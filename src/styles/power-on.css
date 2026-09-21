@@ -1,0 +1,102 @@
+/* ==========================================================================
+   Power-on sequence — ~1.6 s, once per session, skippable.
+   Motion spec 01.
+
+     0 – 120 ms    Void. Nothing painted but the ground colour.
+   120 – 560 ms    One hairline draws left to right, amber at the leading edge.
+   560 – 1200 ms   Stackup fades in and pulls into registration against it.
+  1200 – 1600 ms   Headline settles as Archivo's wdth animates 62 -> 78.
+                   Nav and rail arrive last.
+
+   Everything is gated on html[data-power-on="pending"], which an inline head
+   script sets only when the visitor has not seen it this session AND does
+   not prefer reduced motion. Without that attribute the page is complete on
+   first paint -- which is exactly the reduced-motion requirement.
+   ========================================================================== */
+
+html[data-power-on='pending'] [data-po] { will-change: opacity, transform; }
+
+/* While the sequence runs the nav's static border is handed over to the
+   animated rule, so only one hairline is ever visible. */
+html[data-power-on='pending'] .nav { border-bottom-color: transparent; }
+html[data-power-on='pending'] .nav__rule { display: block; }
+
+/* Frame 1 — void. Held by the 120ms delay on every animation below. */
+html[data-power-on='pending'] [data-po='rule'],
+html[data-power-on='pending'] [data-po='stack'],
+html[data-power-on='pending'] [data-po='headline'],
+html[data-power-on='pending'] [data-po='late'] {
+  opacity: 0;
+}
+
+/* Frame 2 — the hairline draws L->R with an amber leading edge. */
+html[data-power-on='pending'] [data-po='rule'] {
+  transform-origin: left center;
+  animation: po-rule 440ms var(--e-settle) 120ms forwards;
+}
+
+html[data-power-on='pending'] [data-po='rule']::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 120px;
+  background: linear-gradient(to right, transparent, var(--live));
+  animation: po-rule-edge 440ms var(--e-settle) 120ms forwards;
+}
+
+/* Frame 3 — stackup fades in and pulls into registration. */
+html[data-power-on='pending'] [data-po='stack'] {
+  animation: po-register 640ms var(--e-settle) 560ms forwards;
+}
+
+/* Frame 4 — headline settles, wdth 62 -> 78. */
+html[data-power-on='pending'] [data-po='headline'] {
+  animation: po-headline 400ms var(--e-settle) 1200ms forwards;
+}
+
+/* Nav and rail arrive last. */
+html[data-power-on='pending'] [data-po='late'] {
+  animation: po-late 400ms var(--e-settle) 1200ms forwards;
+}
+
+@keyframes po-rule {
+  from { opacity: 1; transform: scaleX(0); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes po-rule-edge {
+  from { opacity: 1; }
+  80%  { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes po-register {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes po-headline {
+  from {
+    opacity: 0;
+    font-variation-settings: 'wdth' 62, 'wght' 700;
+  }
+  to {
+    opacity: 1;
+    font-variation-settings: 'wdth' 78, 'wght' 700;
+  }
+}
+
+@keyframes po-late {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Skipped, finished, or never started: everything at its resting state. */
+html:not([data-power-on='pending']) [data-po] {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+html:not([data-power-on='pending']) [data-po='rule']::after { display: none; }

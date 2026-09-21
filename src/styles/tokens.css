@@ -1,0 +1,136 @@
+/* ==========================================================================
+   ISOLATION — design tokens
+   Source: 02-BRAND-AND-DESIGN-SYSTEM.md §9 (drop-in token file) and §9.1.
+
+   §9 names the ground tokens --hv-*; the component inventory (09) and the
+   design reference use the shorter --void / --panel / --rule vocabulary for
+   the same values. Each hex is declared once under the name the components
+   actually consume, and the --hv-* names alias onto it so anything copied
+   straight out of §9 still resolves.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Ground ─────────────────────────────────────────────────────────── */
+  --void: #08090B;        /* page ground */
+  --void-deep: #050608;   /* canvas behind artboards, 3D stage */
+  --panel: #0E1013;       /* card and panel fill */
+  --panel-2: #15181D;     /* chip fill, quote fill */
+  --rule: #23272E;        /* every hairline, default border */
+  --rule-2: #333942;      /* hover border */
+
+  /* §9 aliases */
+  --hv-void: var(--void);
+  --hv-substrate: var(--panel);
+  --hv-rail: var(--panel-2);
+  --hv-hairline: var(--rule);
+  --hv-hairline-hi: var(--rule-2);
+
+  /* ── Silkscreen — text ──────────────────────────────────────────────── */
+  --silk: #ECEFF3;        /* primary text */
+  --silk-dim: #98A1AC;    /* secondary text */
+  --silk-faint: #757D88;  /* labels, captions */
+
+  /* ── Primary side — energised ───────────────────────────────────────── */
+  --live: #F2A93B;
+  --live-deep: #B2761F;
+  --live-wash: rgb(242 169 59 / 0.08);
+
+  /* ── Secondary side — isolated & measured ───────────────────────────── */
+  --iso: #79D2E6;
+  --iso-deep: #2E7E92;
+  --iso-wash: rgb(121 210 230 / 0.08);
+  --iso-edge: rgb(121 210 230 / 0.20);   /* IsolationPanel border */
+
+  /* ── Material — 3D and rare surface use ─────────────────────────────── */
+  --copper: #C2713F;
+  --gold: #D9B25F;
+  --mask: #0D1512;
+  --mask-lit: #16241E;    /* soldermask under 3D bench lighting; see §9.1 */
+  --fr4: #B79A63;
+
+  /* ── Status — chips only, never decorative ──────────────────────────── */
+  --fault: #E5484D;
+  --pass: #49C98A;
+  --pass-edge: rgb(73 201 138 / 0.40);
+  --live-edge: rgb(242 169 59 / 0.45);
+
+  /* Depth markers — how much of a domain he owns.
+     Rendered as a bar, never a percentage, bar chart or star rating. */
+  --depth-owned: var(--live);          /* filled bar */
+  --depth-contributed: var(--iso);     /* outlined bar */
+  --depth-studied: var(--silk-faint);  /* dashed rule */
+
+  /* Release state — a board's position in the lifecycle.
+     Solid trace + solid via = fabricated. Dashed = not yet fabricated. */
+  --state-released: var(--pass);
+  --state-progress: var(--live);
+  --state-progress-wash: rgb(242 169 59 / 0.10);
+  --trace-dash-unfabricated: 6 6;
+  --via-dash-unfabricated: 3 3;
+
+  /* 3D material parameters — colours above, surface response here.
+     Lit like a bench: key 4200 K upper-left, --iso fill 15% lower-right,
+     one --live rim on the primary side only. Figures below are the ones the
+     built scenes use (pcb-lib.js) and assume the stage's environment map;
+     see §9.1 before changing either. */
+  --mat-mask-roughness: 0.55;    --mat-mask-metalness: 0;
+  --mat-copper-roughness: 0.48;  --mat-copper-metalness: 0.92;
+  --mat-gold-roughness: 0.18;    --mat-gold-metalness: 1;
+  --mat-fr4-roughness: 0.68;     --mat-fr4-metalness: 0;
+  /* Neutral metals must stay albedo-dominant or they take the fill's hue. */
+  --mat-steel-roughness: 0.58;   --mat-steel-metalness: 0.65;
+  --mat-alu-roughness: 0.62;     --mat-alu-metalness: 0.72;
+
+  /* ── Type ───────────────────────────────────────────────────────────── */
+  --f-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --f-read: "Source Serif 4", ui-serif, Georgia, serif;
+  --f-data: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  --t-display-1: clamp(3.5rem, 9vw, 9rem);
+  --t-display-2: clamp(2.75rem, 5.5vw, 5rem);
+  --t-h1: clamp(2.25rem, 3.6vw, 3.25rem);
+  --t-h2: clamp(1.75rem, 2.4vw, 2.25rem);
+  --t-h3: 1.375rem;
+  --t-lead: 1.375rem;
+  --t-read: 1.1875rem;
+  --t-body: 1rem;
+  --t-sm: 0.875rem;
+  --t-xs: 0.75rem;
+  --t-data: 0.8125rem;
+  --t-data-lg: 1.5rem;
+
+  /* ── Space ──────────────────────────────────────────────────────────── */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-6: 24px;  --sp-8: 32px;  --sp-12: 48px; --sp-16: 64px;
+  --sp-24: 96px; --sp-32: 128px; --sp-48: 192px;
+
+  /* ── Structure ──────────────────────────────────────────────────────── */
+  --max-content: 1320px;
+  --page-margin: clamp(20px, 5vw, 72px);
+  --gutter: 24px;
+  --rail-cols: 3;
+  --barrier-col: 4;
+  --content-cols: 8;
+  --r-board: 6px;
+  --r-chip: 2px;
+  --chamfer: 14px;
+  --hairline: 1px;
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --e-settle: cubic-bezier(0.16, 1, 0.30, 1);   /* arrivals */
+  --e-snap: cubic-bezier(0.40, 0, 0.20, 1);
+  --e-probe: cubic-bezier(0.65, 0, 0.35, 1);    /* trace sweeps */
+  --d-fast: 140ms; --d-base: 240ms; --d-slow: 480ms; --d-scene: 900ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --d-fast: 0ms; --d-base: 0ms; --d-slow: 0ms; --d-scene: 0ms; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

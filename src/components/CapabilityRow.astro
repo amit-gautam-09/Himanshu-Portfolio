@@ -1,0 +1,79 @@
+---
+/**
+ * CapabilityRow — name, description, and optionally a DepthMarker.
+ *
+ * Rows are separated by --rule top borders; the caller marks the last row so
+ * it also carries a bottom border. Home states six domains without depth
+ * markers; the About capability matrix adds them, at which point the grid
+ * becomes 250px / 1fr / 130px (component inventory 2.4).
+ */
+import DepthMarker from './DepthMarker.astro';
+
+interface Props {
+  name: string;
+  description: string;
+  /** 390 artboard shortens most descriptions. */
+  mobileDescription?: string;
+  depth?: 'owned' | 'contributed' | 'studied';
+  last?: boolean;
+  class?: string;
+}
+const {
+  name, description, mobileDescription = description,
+  depth, last = false, class: className
+} = Astro.props;
+const differs = mobileDescription !== description;
+---
+
+<div
+  class:list={['cap', { 'cap--last': last, 'cap--with-depth': depth }, className]}
+>
+  <div class="cap__name">{name}</div>
+  <div class="cap__desc">
+    <span class:list={{ 'is-wide-only': differs }}>{description}</span>
+    {differs && <span class="is-narrow-only">{mobileDescription}</span>}
+  </div>
+  {depth && <div class="cap__depth"><DepthMarker depth={depth} /></div>}
+</div>
+
+<style>
+  .cap {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 24px;
+    padding: 16px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .cap--with-depth { grid-template-columns: 250px minmax(0, 1fr) 130px; }
+  .cap--last { border-bottom: 1px solid var(--rule); }
+
+  .cap__name {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .cap__desc {
+    font-size: 14px;
+    color: var(--silk-dim);
+  }
+
+  .cap__depth { justify-self: start; align-self: center; }
+
+  .is-narrow-only { display: none; }
+
+  @media (max-width: 900px) {
+    .is-wide-only { display: none; }
+    .is-narrow-only { display: inline; }
+
+    .cap,
+    .cap--with-depth {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+      padding: 14px 0;
+    }
+    .cap__name { font-size: 14px; }
+    .cap__desc { font-size: 13px; }
+    .cap__depth { margin-top: 8px; }
+  }
+</style>

@@ -1,0 +1,161 @@
+---
+/**
+ * StackupSVG — the six-layer PCB cross-section, exploded, with ice dimension
+ * callouts down the right side.
+ *
+ * This is the drawing, not a placeholder: it is what paints before the S1
+ * three.js scene takes over, and it is the fallback for no-WebGL, low-power
+ * and prefers-reduced-motion. No spinner, ever.
+ *
+ * SIX COPPER LAYERS. The handoff's drawing showed four (top, ground, power,
+ * bottom) with one prepreg and one core, called it six-layer by numbering the
+ * dielectrics L1-L6, and totalled 0.95 mm against a stated 1.60 mm. Fabs
+ * count copper and the audience here is hardware engineers, so this is a real
+ * foil-build six-layer: two cores, three prepregs, six copper layers.
+ *
+ * The numbers are a STANDARD PUBLISHED BUILD, not a board of his — the
+ * drawing says so, which is the option 07 §8.3 allows when the real
+ * thicknesses are not available.
+ *
+ *   soldermask  0.025 x2   0.05
+ *   copper      0.035 x6   0.21
+ *   prepreg     0.18  x3   0.54
+ *   core        0.40  x2   0.80
+ *                          1.60 mm
+ *
+ * Drawn thicknesses keep the prepreg-to-core ratio honest (14:30 against a
+ * real 0.18:0.40) and exaggerate copper, because 35 µm beside a 0.40 mm core
+ * is invisible. Soldermask is in the arithmetic, not the drawing — the
+ * overall callout says so rather than adding two more bands nobody can see.
+ *
+ * `compact` renders the 390 artboard version: the same drawing with the
+ * in-SVG callouts dropped, because a 12px label in a 980-unit viewBox shown
+ * at 350px renders at ~5px. Mobile puts the numbers in HTML beside it
+ * instead (build note 5).
+ */
+interface Props {
+  compact?: boolean;
+  class?: string;
+}
+const { compact = false, class: className } = Astro.props;
+
+const SKIN = {
+  copper: { face: 'var(--copper)', side: '#6d3f24', rect: '#8f5330' },
+  prepreg: { face: 'var(--fr4)', side: '#5f5134', rect: '#7d6a45' },
+  core: { face: '#9c8354', side: '#52462d', rect: '#6b5b3b' }
+};
+
+/* Top to bottom, at an 18-unit exploded gap. y is the front-bottom-left of
+   each slab; the isometric top face sits 55 above it. */
+const BANDS = [
+  { y: 70, h: 6, kind: 'copper', text: '35 µm · L1 top copper' },
+  { y: 94, h: 14, kind: 'prepreg', text: '0.18 mm · prepreg' },
+  { y: 126, h: 6, kind: 'copper', text: '35 µm · L2 ground plane' },
+  { y: 150, h: 30, kind: 'core', text: '0.40 mm · core' },
+  { y: 198, h: 6, kind: 'copper', text: '35 µm · L3 signal' },
+  { y: 222, h: 14, kind: 'prepreg', text: '0.18 mm · prepreg' },
+  { y: 254, h: 6, kind: 'copper', text: '35 µm · L4 signal' },
+  { y: 278, h: 30, kind: 'core', text: '0.40 mm · core' },
+  { y: 326, h: 6, kind: 'copper', text: '35 µm · L5 power plane' },
+  { y: 350, h: 14, kind: 'prepreg', text: '0.18 mm · prepreg' },
+  { y: 382, h: 6, kind: 'copper', text: '35 µm · L6 bottom copper' }
+];
+
+/* The callout line points at each slab's top face: y - 50. */
+const CALLOUTS = BANDS.map((b) => ({ y: b.y - 50, text: b.text }));
+
+/* The callout column runs out of viewBox at ~24 mono characters — the
+   longest layer label, "35 µm · L6 bottom copper", uses all of it. The
+   summary is three short lines rather than one long one that clips. */
+const TOTAL = { y: 356, text: '1.60 mm overall' };
+const MASK_NOTE = { y: 372, text: 'incl. 2 × 25 µm mask' };
+const PROVENANCE = { y: 388, text: 'representative build' };
+
+/* One designator per COPPER layer. Dielectrics are not layers. */
+const DESIGNATORS = BANDS.filter((b) => b.kind === 'copper').map((b, i) => ({
+  y: b.y + 8,
+  text: `L${i + 1}`,
+  live: i === 0
+}));
+---
+
+<svg
+  width={compact ? 350 : 1000}
+  height={compact ? 200 : 408}
+  viewBox={compact ? '0 0 830 400' : '0 0 980 400'}
+  class:list={['stackup', className]}
+  role="img"
+  aria-label="Six-layer PCB cross-section stackup, exploded: 1.60 mm overall, six 35 µm copper layers on two 0.40 mm cores and three 0.18 mm prepregs. A representative published build, not a specific board."
+>
+  <defs>
+    <linearGradient id="bench" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.07" />
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  {BANDS.map((b, i) => {
+    const skin = SKIN[b.kind as keyof typeof SKIN];
+    const top = b.y - 55;
+    return (
+      <g class="stackup__layer" style={`--layer-index:${i}`}>
+        <polygon points={`90,${b.y} 200,${top} 720,${top} 610,${b.y}`} fill={skin.face} />
+        <polygon
+          points={`610,${b.y} 720,${top} 720,${top + b.h} 610,${b.y + b.h}`}
+          fill={skin.side}
+        />
+        <rect x="90" y={b.y} width="520" height={b.h} fill={skin.rect} />
+        {/* The routed edge: amber on copper only, so six layers are countable
+            at the cut even when the drawing is small. */}
+        {!compact && b.kind === 'copper' && (
+          <line x1="90" y1={b.y} x2="90" y2={b.y + b.h} stroke="var(--live)" stroke-width="2" />
+        )}
+        {!compact && i === BANDS.length - 1 && (
+          <line x1="610" y1={b.y + 6} x2="720" y2={top + 6}
+                stroke="var(--iso)" stroke-width="1.5" opacity="0.5" />
+        )}
+      </g>
+    );
+  })}
+
+  <polygon points="90,70 200,15 720,15 610,70" fill="url(#bench)" />
+
+  {!compact && (
+    <g class="stackup__callouts" font-family="JetBrains Mono, monospace" font-size="12" fill="var(--iso)">
+      <g stroke="var(--iso)" stroke-width="1">
+        {CALLOUTS.map((c) => <line x1="726" y1={c.y} x2="792" y2={c.y} />)}
+        <line x1="726" y1={TOTAL.y} x2="792" y2={TOTAL.y} />
+      </g>
+      {CALLOUTS.map((c) => <text x="800" y={c.y + 12}>{c.text}</text>)}
+      <text x="800" y={TOTAL.y + 12} fill="var(--silk-faint)">{TOTAL.text}</text>
+      <text x="800" y={MASK_NOTE.y + 12} font-size="10" fill="var(--silk-faint)">
+        {MASK_NOTE.text}
+      </text>
+      <text x="800" y={PROVENANCE.y + 12} font-size="10" fill="var(--silk-faint)">
+        {PROVENANCE.text}
+      </text>
+    </g>
+  )}
+
+  {!compact && (
+    <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--silk-faint)">
+      {DESIGNATORS.map((d) => (
+        <text x="30" y={d.y} text-anchor="end" fill={d.live ? 'var(--live)' : 'var(--silk-faint)'}>
+          {d.text}
+        </text>
+      ))}
+    </g>
+  )}
+
+  {compact && (
+    <g stroke="var(--iso)" stroke-width="1.5">
+      <line x1="726" y1="20" x2="800" y2="20" />
+      <line x1="726" y1="332" x2="800" y2="332" />
+      <line x1="796" y1="20" x2="796" y2="332" />
+    </g>
+  )}
+</svg>
+
+<style>
+  .stackup { display: block; margin-inline: auto; }
+</style>

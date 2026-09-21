@@ -1,0 +1,544 @@
+---
+/**
+ * Sheet 1 — Home. Design reference turns #1a (1440) and #1b (390).
+ *
+ * Purpose: establish what he does, at what scale, to what standard, and that
+ * he is legally hireable in the EU — in one screen.
+ *
+ * Order is load-bearing: hero, positioning, measured, selected work,
+ * capability, what I am building now, work authorisation, title block.
+ */
+import Sheet from '../layouts/Sheet.astro';
+import BrokenRule from '../components/BrokenRule.astro';
+import BoardCard from '../components/BoardCard.astro';
+import MetricCell from '../components/MetricCell.astro';
+import CapabilityRow from '../components/CapabilityRow.astro';
+import SpecRail from '../components/SpecRail.astro';
+import IsolationPanel from '../components/IsolationPanel.astro';
+import DimensionLine from '../components/DimensionLine.astro';
+import Chip from '../components/Chip.astro';
+import StackupSVG from '../components/StackupSVG.astro';
+import { identity, cv } from '../data/site';
+import {
+  boards, capabilities, metrics, workAuthorisation,
+  homeRail, homeRailMobile, buildingNow, positioning
+} from '../data/boards';
+
+const importMap = {
+  imports: {
+    three: 'https://unpkg.com/three@0.184.0/build/three.module.js',
+    'three/addons/controls/OrbitControls.js':
+      'https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js'
+  },
+  integrity: {
+    'https://unpkg.com/three@0.184.0/build/three.module.js':
+      'sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J',
+    'https://unpkg.com/three@0.184.0/build/three.core.js':
+      'sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT',
+    'https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js':
+      'sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9'
+  }
+};
+---
+
+<Sheet
+  title="Himanshu Gautam — Hardware engineer, power electronics and PCB design"
+  description="Hardware engineer designing mains switching supplies end to end: boost PFC to a 380–400 VDC bus, isolated GaN flyback, four-switch buck-boost charging, to IEC and DIN standards with CE marking."
+  active="Home"
+  sheet="1 of 5"
+>
+  {/* ── Hero ─────────────────────────────────────────────────────────── */}
+  <section class="hero" data-hero-stage>
+    {/* Stage and copy pin together while the stack explodes. Both the pin
+        and the runway below it are inert until hero-stage.js adds
+        `is-pinned`, so without JS, without WebGL, or under reduced motion
+        the hero is exactly the block the design reference draws. */}
+    <div class="hero__pin" data-hero-pin>
+    <div class="hero__stage" data-po="stack">
+      <div class="hero__fallback" data-hero-fallback>
+        <StackupSVG class="hero__svg hero__svg--wide" />
+        <StackupSVG compact class="hero__svg hero__svg--narrow" />
+      </div>
+      {/* The S1 three.js scene replaces the drawing only once it is built.
+          No spinner: the drawing above is not a placeholder. */}
+      <div class="hero__mount" data-hero-mount hidden></div>
+
+      <div class="hero__caption">
+        <span class="hero__caption-iso">1.60 mm overall</span>
+        <span class="hero__caption-faint">· 6 layers</span>
+      </div>
+    </div>
+
+    <div class="hero__copy">
+      <h1 class="hero__name" data-po="headline">{identity.name}</h1>
+      <p class="hero__discipline">{identity.discipline}</p>
+      <p class="hero__location">{identity.location}</p>
+      <p class="hero__hint">Scroll to explode the stack</p>
+      <a class="hero__cta" href={cv.href}>{cv.label}</a>
+    </div>
+    </div>
+
+    {/* Scroll runway. It is what the explode is mapped against — not the
+        hero's height, which includes the runway and would chase its own
+        tail. Height 0 until the scene takes over. */}
+    <div class="hero__runway" data-hero-runway aria-hidden="true"></div>
+  </section>
+
+  {/* ── The rail collapses to a spec strip ABOVE the content on 390 ──── */}
+  <div class="bleed mobile-only">
+    <SpecRail items={homeRailMobile} strip />
+    <div class="barrier-h">
+      <span class="barrier-h__line"></span>
+      <DimensionLine width={46} label="8.0 mm" />
+      <span class="barrier-h__line"></span>
+    </div>
+  </div>
+
+  {/* ── Positioning ──────────────────────────────────────────────────── */}
+  <div class="bleed desktop-only"><BrokenRule label="Positioning" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid positioning">
+      <div class="rail desktop-only"><SpecRail items={homeRail} /></div>
+
+      {/* The barrier is annotated exactly once, and this is it. */}
+      <div class="gap desktop-only">
+        <div class="creepage"><DimensionLine width={58} label="8.0 mm" /></div>
+      </div>
+
+      <div class="content">
+        <p class="positioning__text">{positioning}</p>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Measured ─────────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Measured" /></div>
+
+  <div class="bleed">
+    <div class="metrics measure">
+      {metrics.map((m) => (
+        <MetricCell
+          value={m.value}
+          caption={m.caption}
+          mobileValue={m.mobile.value}
+          mobileCaption={m.mobile.caption}
+        />
+      ))}
+    </div>
+  </div>
+
+  {/* ── Selected work ────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Selected work" /></div>
+
+  <div class="bleed">
+    <div class="boards measure">
+      {boards.map((b) => (
+        <BoardCard
+          designator={b.designator}
+          title={b.title}
+          role={b.role}
+          status={b.status}
+          specs={b.specs}
+          specsMobile={b.specsMobile}
+          standards={b.standards}
+          standardsMobile={b.standardsMobile}
+          confidential={b.confidential}
+          mains={b.mains}
+          href={b.href}
+        />
+      ))}
+    </div>
+  </div>
+
+  {/* ── Capability ───────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Capability" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid capability">
+      <div class="rail desktop-only">
+        <p class="capability__lede">Six domains, named by what is owned</p>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content capability__rows">
+        {capabilities.map((c, i) => (
+          <CapabilityRow
+            name={c.name}
+            description={c.description}
+            mobileDescription={c.mobile}
+            last={i === capabilities.length - 1}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {/* ── What I am building now ───────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="What I'm building now" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid building">
+      <div class="rail desktop-only">
+        <SpecRail
+          items={[
+            { label: 'Designator', value: buildingNow.designator },
+            { label: 'Ownership', value: buildingNow.ownership }
+          ]}
+        />
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        <div class="building__head">
+          <h3 class="building__title">{buildingNow.title}</h3>
+          <Chip variant="status-progress">{buildingNow.status}</Chip>
+        </div>
+        <p class="building__body">
+          <span class="is-wide-only">{buildingNow.body}</span>
+          <span class="is-narrow-only">{buildingNow.bodyMobile}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Work authorisation ───────────────────────────────────────────── */}
+  <div class="bleed work-auth">
+    <div class="measure">
+      <IsolationPanel
+        split
+        heading="Work authorisation"
+        lede="The question every EU recruiter asks, answered before it is asked."
+      >
+        <div class="work-auth__grid">
+          {workAuthorisation.map((f) => (
+            <div>
+              <div class="work-auth__label">{f.label}</div>
+              <div class="work-auth__value">{f.value}</div>
+            </div>
+          ))}
+        </div>
+      </IsolationPanel>
+    </div>
+  </div>
+</Sheet>
+
+{/* The hero scene is vanilla ES modules resolved by an import map, so it is
+    served raw rather than bundled. SRI hashes are the harness's pinned set. */}
+<script is:inline type="importmap" set:html={JSON.stringify(importMap)} />
+<script is:inline defer src="/3d/three-d-stage.js"></script>
+<script is:inline type="module" src="/3d/hero-stage.js"></script>
+
+<style>
+  .desktop-only { display: block; }
+  .mobile-only { display: none; }
+  .is-narrow-only { display: none; }
+
+  /* ── Hero ───────────────────────────────────────────────────────────── */
+  .hero {
+    padding: 72px var(--page-margin) 88px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero__pin { width: 100%; display: flex; flex-direction: column;
+               align-items: center; }
+  .hero__runway { height: 0; }
+
+  /* The held moment. The exploded stack is ~358px tall in a 408px stage, so
+     in normal flow it has left the viewport before it finishes separating —
+     measured, the stage's bottom edge was 8px from the top of the screen at
+     full explode. Pinning stage and copy TOGETHER keeps first paint
+     identical to the reference and avoids the copy sliding through the
+     drawing, which pinning the stage alone would cause.
+
+     The nav scrolls away rather than sticking, so 24px is clearance from
+     the top of the screen, not from a bar. Below 720px tall the block will
+     not fit, so it is left in flow; the runway collapses with it and
+     hero-stage.js falls back to the hero's own extent. */
+  @media (min-height: 720px) {
+    .hero.is-pinned .hero__pin { position: sticky; top: 24px; }
+    .hero.is-pinned .hero__runway { height: 600px; }
+  }
+
+  .hero__stage { position: relative; width: 100%; max-width: 1000px; }
+  /* StackupSVG.astro's root carries ITS scope id, not this file's, so a
+     plain selector never matches it. The :global() is anchored to
+     .hero__fallback — which does carry this scope — so the rule outranks
+     the child's own `.stackup[data-astro-cid]` display rule. Unanchored,
+     both drawings rendered and the hero stage was 608px (408 + 200). */
+  .hero__fallback :global(.hero__svg--narrow) { display: none; }
+
+  /* Once the scene takes over, the drawing is hidden but STAYS IN FLOW: it
+     is what gives .hero__stage its height, and the canvas mount is
+     inset:0 against it. Using [hidden] here collapsed the stage to zero and
+     the renderer sized itself to 1px. */
+  .hero__fallback.is-replaced { visibility: hidden; }
+
+  .hero__mount {
+    position: absolute;
+    inset: 0;
+    transform-origin: center;
+  }
+
+  .hero__mount :global(three-d-stage) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .hero__caption { display: none; }
+
+  .hero__copy {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    max-width: 980px;
+    text-align: center;
+  }
+
+  .hero__name {
+    font-size: 104px;
+    font-weight: 700;
+    font-stretch: 78%;
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+  }
+
+  .hero__discipline {
+    font-size: 30px;
+    font-weight: 500;
+    font-stretch: 88%;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .hero__location {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--silk-dim);
+  }
+
+  .hero__hint {
+    margin-top: 4px;
+    font-family: var(--f-data);
+    font-size: 12px;
+    color: var(--silk-faint);
+  }
+
+  .hero__cta { display: none; }
+
+  /* ── Positioning ────────────────────────────────────────────────────── */
+  .positioning { padding: 56px 0; }
+
+  .iso-grid > .gap { position: relative; }
+
+  .creepage {
+    position: absolute;
+    top: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .positioning__text {
+    font-family: var(--f-read);
+    font-size: 22px;
+    line-height: 1.5;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  /* ── Measured ───────────────────────────────────────────────────────── */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gutter);
+    padding: 48px 0 56px;
+  }
+
+  /* ── Selected work ──────────────────────────────────────────────────── */
+  .boards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+    padding: 48px 0 56px;
+  }
+
+  /* ── Capability ─────────────────────────────────────────────────────── */
+  .capability { padding: 48px 0 56px; }
+
+  .capability__lede {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .capability__rows { display: flex; flex-direction: column; }
+
+  /* ── Building now ───────────────────────────────────────────────────── */
+  .building { padding: 48px 0 56px; }
+
+  .building__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .building__title {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .building__body {
+    margin-top: 14px;
+    font-family: var(--f-read);
+    font-size: 19px;
+    line-height: 1.68;
+    max-width: 64ch;
+    color: var(--silk-dim);
+    text-wrap: pretty;
+  }
+
+  /* ── Work authorisation ─────────────────────────────────────────────── */
+  .work-auth { padding: 24px var(--page-margin) 72px; }
+
+  .work-auth__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 32px;
+  }
+
+  .work-auth__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .work-auth__value {
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk);
+    margin-top: 4px;
+  }
+
+  /* ══ 390 artboard ═══════════════════════════════════════════════════ */
+  @media (max-width: 900px) {
+    .desktop-only { display: none; }
+    .mobile-only { display: block; }
+    .is-wide-only { display: none; }
+    .is-narrow-only { display: inline; }
+
+    .hero {
+      padding: 28px var(--page-margin) 32px;
+      align-items: stretch;
+    }
+
+    .hero__stage { max-width: none; }
+    .hero__fallback :global(.hero__svg--wide) { display: none; }
+    .hero__fallback :global(.hero__svg--narrow) { display: block; }
+
+    /* Labels live in HTML here, not in the SVG: a 12px label in a 980-unit
+       viewBox shown at 350px renders at ~5px (build note 5). */
+    .hero__caption {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-family: var(--f-data);
+      font-size: 12px;
+    }
+
+    .hero__caption-iso { color: var(--iso); }
+    .hero__caption-faint { color: var(--silk-faint); }
+
+    .hero__copy {
+      margin-top: 0;
+      align-items: stretch;
+      text-align: left;
+      gap: 0;
+    }
+
+    .hero__name {
+      margin-top: 22px;
+      font-size: 44px;
+      line-height: 0.92;
+      letter-spacing: -0.03em;
+    }
+
+    .hero__discipline {
+      margin-top: 12px;
+      font-size: 19px;
+      line-height: 1.18;
+      letter-spacing: -0.015em;
+    }
+
+    .hero__location {
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hero__hint { display: none; }
+
+    .hero__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      /* The handoff specifies "full-width at 13px padding (>=44px hit
+         target)". 13px padding against a 14px/1.2 label measures 41px, so
+         the floor is stated rather than left to the type metrics. */
+      min-height: 44px;
+      padding: 13px 16px;          /* >=44px hit target */
+      background: var(--live);
+      color: var(--void);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: var(--r-chip);
+      text-decoration: none;
+    }
+
+    /* The barrier rotates horizontal. It does not disappear. */
+    .barrier-h {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .barrier-h__line {
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    .positioning { padding: 20px 0 0; }
+    .positioning__text { font-size: 19px; line-height: 1.55; }
+
+    .metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      padding: 20px 0 0;
+    }
+
+    .boards {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      padding: 20px 0 0;
+    }
+
+    .capability { padding: 16px 0 0; }
+    .building { padding: 20px 0 0; }
+
+    .building__head { flex-wrap: wrap; gap: 10px; }
+    .building__title { font-size: 19px; line-height: 1.25; }
+    .building__body { margin-top: 12px; font-size: 17px; line-height: 1.6; }
+
+    .work-auth { padding: 28px var(--page-margin) 0; }
+    .work-auth__grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .work-auth__label { font-size: 11px; }
+    .work-auth__value { font-size: 12px; margin-top: 3px; }
+  }
+</style>

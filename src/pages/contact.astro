@@ -1,0 +1,314 @@
+---
+/**
+ * Sheet 5 — Contact. Design reference turn #3c (1440).
+ *
+ * DELIBERATE DEVIATION, decided by the client 2026-09-21: #3c draws a message
+ * form in a rest and a validation-failure state. This page has **no form**.
+ * Enquiries arrive by WhatsApp or email instead, which means no backend, no
+ * adapter, and nothing that can silently fail to deliver a message — the
+ * failure mode a form on a static site actually has.
+ *
+ * Everything else follows the artboard: masthead and lede, the contact rail,
+ * work authorisation at full length, and "What I'm looking for".
+ *
+ * No response-time commitment is published. It was asked for and declined.
+ */
+import Sheet from '../layouts/Sheet.astro';
+import BrokenRule from '../components/BrokenRule.astro';
+import IsolationPanel from '../components/IsolationPanel.astro';
+import { identity, contact } from '../data/site';
+import { workAuthorisationFull } from '../data/boards';
+
+const channels = [
+  {
+    label: 'WhatsApp',
+    value: contact.whatsapp.label,
+    href: contact.whatsapp.href,
+    note: 'Fastest. Message, no call needed.',
+    primary: true
+  },
+  {
+    label: 'Email',
+    value: contact.channel.label,
+    href: contact.channel.href,
+    note: 'For anything with an attachment.',
+    primary: false
+  }
+];
+---
+
+<Sheet
+  title="Contact — Himanshu Gautam"
+  description="Direct contact by WhatsApp or email, plus work authorisation in full: Critical Skills Employment Permit eligible, no Labour Market Needs Test, 45 days notice."
+  active="Contact"
+  sheet="5 of 5"
+>
+  {/* ── Masthead ─────────────────────────────────────────────────────── */}
+  <div class="bleed">
+    <div class="iso-grid contact-head">
+      <div class="rail desktop-only">
+        <p class="contact__sheet">Sheet 5 of 5</p>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        <h1 class="contact__title">Contact</h1>
+        <p class="contact__lede">{contact.lede}</p>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Channels + work authorisation ────────────────────────────────── */}
+  <div class="bleed">
+    <div class="iso-grid contact-body">
+      <div class="rail desktop-only">
+        <div class="contact__rail">
+          <div>
+            <p class="contact__rail-label">Email</p>
+            <a class="contact__rail-value" href={contact.channel.href}>
+              {contact.channel.label}
+            </a>
+          </div>
+          <div>
+            <p class="contact__rail-label">WhatsApp</p>
+            <a class="contact__rail-value" href={contact.whatsapp.href}>
+              {contact.whatsapp.label}
+            </a>
+            <p class="contact__rail-note">{contact.timezone}</p>
+          </div>
+        </div>
+      </div>
+      <div class="gap desktop-only"></div>
+
+      <div class="content">
+        <IsolationPanel heading="Work authorisation, in full">
+          <div class="contact__auth-grid">
+            {workAuthorisationFull.map((f) => (
+              <div>
+                <div class="contact__auth-label">{f.label}</div>
+                <div class="contact__auth-value">{f.value}</div>
+              </div>
+            ))}
+          </div>
+        </IsolationPanel>
+      </div>
+    </div>
+  </div>
+
+  {/* ── What I'm looking for ─────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="What I'm looking for" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid contact-wants">
+      <div class="rail desktop-only">
+        <p class="contact__rail-label">Domain</p>
+        <p class="contact__rail-value contact__rail-value--static">{contact.domain}</p>
+        <p class="contact__rail-label contact__rail-label--spaced">Locations</p>
+        <p class="contact__rail-value contact__rail-value--static">{contact.locations}</p>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        {/* His line first — what he does — then the artboard's paragraph,
+            which is what he is looking for. */}
+        <p class="contact__para contact__para--lead">{contact.lookingFor}</p>
+        <p class="contact__para">{contact.wants}</p>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Reach him ────────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Send a message" emphasis="strong" /></div>
+
+  <div class="bleed contact-channels">
+    <div class="iso-grid">
+      <div class="rail desktop-only">
+        <p class="contact__rail-label">Direct, not a form</p>
+        <p class="contact__rail-note contact__rail-note--block">
+          A contact form on a static site can fail quietly. These cannot.
+        </p>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content contact__channels">
+        {channels.map((c) => (
+          <a
+            class:list={['channel', { 'channel--primary': c.primary }]}
+            href={c.href}
+            rel={c.primary ? 'noopener' : undefined}
+            target={c.primary ? '_blank' : undefined}
+          >
+            <span class="channel__label">{c.label}</span>
+            <span class="channel__value">{c.value}</span>
+            <span class="channel__note">{c.note}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</Sheet>
+
+<style>
+  .contact-head { padding: 56px 0 44px; }
+
+  .contact__sheet {
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk-faint);
+  }
+
+  .contact__title {
+    font-size: 64px;
+    font-weight: 600;
+    font-stretch: 82%;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+  }
+
+  .contact__lede {
+    margin-top: 14px;
+    font-family: var(--f-read);
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--silk-dim);
+    text-wrap: pretty;
+  }
+
+  .contact-body { padding: 0 0 56px; }
+
+  .contact__rail { display: flex; flex-direction: column; gap: 22px; }
+
+  .contact__rail-label {
+    font-size: 12px;
+    color: var(--silk-faint);
+  }
+
+  .contact__rail-label--spaced { margin-top: 20px; }
+
+  .contact__rail-value {
+    display: inline-block;
+    margin-top: 4px;
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--iso);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    /* WCAG 2.5.8: these are the only links in the rail and nothing sits
+       within 24px of them, but a stated floor beats a measured coincidence. */
+    min-height: 24px;
+  }
+
+  .contact__rail-value--static {
+    color: var(--silk-dim);
+    text-decoration: none;
+  }
+
+  .contact__rail-note {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--silk-faint);
+  }
+
+  .contact__rail-note--block { margin-top: 10px; max-width: 30ch; }
+
+  .contact__auth-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 32px;
+  }
+
+  .contact__auth-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .contact__auth-value {
+    font-family: var(--f-data);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--silk);
+    margin-top: 4px;
+  }
+
+  .contact-wants { padding: 40px 0 56px; }
+
+  .contact__para {
+    font-family: var(--f-read);
+    font-size: 21px;
+    line-height: 1.62;
+    max-width: 62ch;
+    color: var(--silk-dim);
+    text-wrap: pretty;
+  }
+
+  .contact__para + .contact__para { margin-top: 26px; }
+  .contact__para--lead { color: var(--silk); }
+
+  .contact-channels { padding-block: 40px 72px; }
+
+  .contact__channels {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+
+  /* Same chamfer and hover language as BoardCard: border tone only, nothing
+     lifts or scales. */
+  .channel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 22px 24px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-board);
+    clip-path: polygon(14px 0, 100% 0, 100% 100%, 0 100%, 0 14px);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color var(--d-slow) var(--e-probe);
+  }
+
+  .channel:hover,
+  .channel:focus-visible { border-color: var(--rule-2); }
+
+  .channel--primary { border-color: rgb(242 169 59 / 0.35); }
+  .channel--primary:hover,
+  .channel--primary:focus-visible { border-color: rgb(242 169 59 / 0.6); }
+
+  .channel__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .channel__value {
+    font-family: var(--f-data);
+    font-size: 18px;
+    color: var(--silk);
+  }
+
+  .channel--primary .channel__value { color: var(--live); }
+
+  .channel__note {
+    font-size: 13px;
+    color: var(--silk-dim);
+  }
+
+  @media (max-width: 900px) {
+    .desktop-only { display: none; }
+
+    .contact-head { padding: 24px 0 24px; }
+    .contact__title { font-size: 40px; letter-spacing: -0.02em; }
+    .contact__lede { margin-top: 10px; font-size: 19px; }
+
+    .contact-body { padding: 0 0 28px; }
+    .contact__auth-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+
+    .contact-wants { padding: 20px 0 28px; }
+    .contact__para { font-size: 18px; line-height: 1.58; }
+    .contact__para + .contact__para { margin-top: 20px; }
+
+    .contact-channels { padding-block: 20px 32px; }
+    .contact__channels { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  }
+</style>

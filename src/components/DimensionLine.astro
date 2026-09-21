@@ -1,0 +1,111 @@
+---
+/**
+ * DimensionLine — ice extension lines, tick ends, arrowheads at the extremes.
+ * Appears above every metric and as the creepage annotation on the barrier.
+ *
+ * Two real uses in the design:
+ *   <DimensionLine width={120} />                 metric strip: ticks, H=14
+ *   <DimensionLine width={58} label="8.0 mm" />   creepage: no ticks, H=12
+ *
+ * The label sits on a --void chip so it knocks out the rule it annotates.
+ * Reveal: extension lines draw, arrowheads snap, and the value lands on the
+ * SAME tween -- one gesture, not two. Driven by [data-revealed] from
+ * reveal.js; without JS the line is simply drawn.
+ */
+interface Props {
+  width?: number;
+  orientation?: 'horizontal' | 'vertical';
+  label?: string;
+  ticks?: boolean;
+  class?: string;
+}
+const {
+  width = 120,
+  orientation = 'horizontal',
+  label,
+  ticks = !label,
+  class: className
+} = Astro.props;
+
+const h = ticks ? 14 : 12;
+const cy = h / 2;
+const x0 = ticks ? 1 : 0;
+const x1 = width - x0;
+const arrow = ticks ? 8 : 7;
+const lineStart = ticks ? x0 : 4;
+const lineEnd = ticks ? x1 : width - 4;
+---
+
+<span class:list={['dim', `dim--${orientation}`, className]}>
+  <svg
+    width={width}
+    height={h}
+    viewBox={`0 0 ${width} ${h}`}
+    class="dim__svg"
+    aria-hidden="true"
+  >
+    {ticks && (
+      <g class="dim__ticks" stroke="var(--iso-deep)" stroke-width="1">
+        <line x1={x0} y1="2" x2={x0} y2={h - 2} />
+        <line x1={x1} y1="2" x2={x1} y2={h - 2} />
+      </g>
+    )}
+    <line
+      class="dim__line"
+      x1={lineStart}
+      y1={cy}
+      x2={lineEnd}
+      y2={cy}
+      stroke="var(--iso)"
+      stroke-width="1"
+      pathLength="100"
+    />
+    <g class="dim__heads" fill="var(--iso)">
+      <polygon points={`${x0},${cy} ${x0 + arrow},${cy - 3} ${x0 + arrow},${cy + 3}`} />
+      <polygon points={`${x1},${cy} ${x1 - arrow},${cy - 3} ${x1 - arrow},${cy + 3}`} />
+    </g>
+  </svg>
+  {label && <span class="dim__label">{label}</span>}
+</span>
+
+<style>
+  .dim {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .dim--vertical { transform: rotate(90deg); transform-origin: center; }
+
+  .dim__label {
+    font-family: var(--f-data);
+    font-size: 11px;
+    color: var(--iso);
+    background: var(--void);   /* knocks out the rule beneath */
+    padding: 0 4px;
+  }
+
+  /* Reveal: the line draws and the heads snap on one tween. */
+  @media (prefers-reduced-motion: no-preference) {
+    .dim[data-reveal] .dim__line {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+    }
+    .dim[data-reveal] .dim__heads,
+    .dim[data-reveal] .dim__ticks { opacity: 0; }
+
+    .dim[data-reveal][data-revealed] .dim__line {
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset var(--d-slow) var(--e-settle);
+    }
+    .dim[data-reveal][data-revealed] .dim__ticks {
+      opacity: 1;
+      transition: opacity var(--d-base) var(--e-settle);
+    }
+    .dim[data-reveal][data-revealed] .dim__heads {
+      opacity: 1;
+      transition: opacity var(--d-fast) var(--e-snap) calc(var(--d-slow) - var(--d-fast));
+    }
+  }
+</style>

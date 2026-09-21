@@ -1,0 +1,195 @@
+---
+/**
+ * Sheet 3 — Work index. Design reference turn #3a (1440).
+ *
+ * Purpose: show the whole body of work at once, and say what is missing
+ * before the visitor notices it themselves. The scope note sits ABOVE the
+ * cards deliberately — a reader who scrolls into four "Confidential" chips
+ * without an explanation has already drawn a conclusion.
+ *
+ * The cards break the isolation grid and run the full measure, while the
+ * masthead, scope note and filter stay in the content column. That is what
+ * the reference draws: the argument is column-width, the evidence is
+ * page-width.
+ *
+ * No mobile artboard exists for this sheet. It follows #1b's rules — the
+ * rail's content moves above the cards, and the grid collapses to one
+ * column at 900px.
+ */
+import Sheet from '../layouts/Sheet.astro';
+import BoardCard from '../components/BoardCard.astro';
+import FilterChips from '../components/FilterChips.astro';
+import IsolationPanel from '../components/IsolationPanel.astro';
+import { allBoards, capabilityCounts } from '../data/boards';
+
+const facets = capabilityCounts();
+---
+
+<Sheet
+  title="Work — Himanshu Gautam"
+  description="Five boards: a flown pico satellite, three released Gessler GmbH boards, and a USB-C PD bench supply on the bench. Architecture, constraints and measured results."
+  active="Work"
+  sheet="3 of 5"
+>
+  {/* ── Masthead and scope note ──────────────────────────────────────── */}
+  <div class="bleed">
+    <div class="iso-grid work-head">
+      <div class="rail desktop-only">
+        <p class="work__sheet">Sheet 3 of 5</p>
+      </div>
+      <div class="gap desktop-only"></div>
+
+      <div class="content">
+        <h1 class="work__title">Work</h1>
+        <p class="work__lede">Five boards. Four released, one on the bench.</p>
+
+        <IsolationPanel
+          class="work__scope"
+          heading="Read this before you notice what is missing"
+        >
+          <p class="work__scope-body">
+            Three of the boards below are Gessler GmbH intellectual property.
+            There are no schematics, no layouts and no photographs of them
+            anywhere on this site, and there will not be. What each case study
+            carries instead is the architecture, the constraints, the decisions
+            and the measured results — which is the part of the work that was
+            mine.
+          </p>
+        </IsolationPanel>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Capability filter ────────────────────────────────────────────── */}
+  <div class="bleed">
+    <div class="iso-grid work-filter">
+      <div class="rail desktop-only">
+        <p class="work__rail-label">Filter by capability</p>
+      </div>
+      <div class="gap desktop-only"></div>
+
+      <div class="content">
+        <p class="work__rail-label mobile-only">Filter by capability</p>
+        <FilterChips facets={facets} total={allBoards.length} />
+        {/* Sighted visitors watch the grid change; this says the same thing
+            to anyone who cannot see it happen. */}
+        <p class="sr-only" role="status" aria-live="polite" data-filter-status></p>
+      </div>
+    </div>
+  </div>
+
+  {/* ── The boards ───────────────────────────────────────────────────── */}
+  <div class="bleed work-boards">
+    <div class="measure">
+      <div class="boards">
+        {allBoards.map((b) => (
+          <BoardCard
+            designator={b.designator}
+            title={b.title}
+            role={b.role}
+            status={b.status}
+            specs={b.specs}
+            specsMobile={b.specsMobile}
+            standards={b.standards}
+            standardsMobile={b.standardsMobile}
+            confidential={b.confidential}
+            mains={b.mains}
+            unfabricated={b.unfabricated}
+            capabilities={b.capabilities}
+            index
+            indexChip={b.indexChip}
+            featured={b.featured}
+            milestone={b.milestone}
+            href={b.href}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</Sheet>
+
+<script>
+  import '../scripts/work-filter.js';
+</script>
+
+<style>
+  .mobile-only { display: none; }
+
+  .work-head { padding: 56px 0 0; }
+
+  .work__sheet {
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk-faint);
+  }
+
+  .work__title {
+    font-size: 64px;
+    font-weight: 600;
+    font-stretch: 82%;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+  }
+
+  .work__lede {
+    margin-top: 14px;
+    font-family: var(--f-read);
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--silk-dim);
+    text-wrap: pretty;
+  }
+
+  /* Anchored :global(): IsolationPanel's root carries ITS scope id, not
+     this file's, so a bare `.work__scope` never matches. Anchoring to
+     .content — which does carry this scope — makes the rule apply. */
+  .content :global(.work__scope) { margin-top: 44px; }
+
+  .work__scope-body {
+    margin-top: 14px;
+    font-family: var(--f-read);
+    font-size: 19px;
+    line-height: 1.68;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .work-filter { padding: 40px 0 0; }
+
+  .work__rail-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  /* padding-block, NOT the padding shorthand: this class is on the .bleed
+     element, and the shorthand would reset its padding-inline to 0, which
+     floated the cards 12px outside the page margin. */
+  .work-boards { padding-block: 28px 72px; }
+
+  .boards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+
+  /* A hidden card must not leave a hole in the grid. */
+  .boards > [hidden] { display: none; }
+
+  @media (max-width: 900px) {
+    .desktop-only { display: none; }
+    .mobile-only { display: block; }
+
+    .work-head { padding: 24px 0 0; }
+    .work__title { font-size: 40px; letter-spacing: -0.02em; }
+    .work__lede { margin-top: 10px; font-size: 19px; }
+    .work__scope { margin-top: 24px; }
+    .work__scope-body { font-size: 17px; line-height: 1.6; }
+
+    .work-filter { padding: 24px 0 0; }
+    .work__rail-label { margin-bottom: 10px; }
+
+    .work-boards { padding-block: 20px 32px; }
+    .boards { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  }
+</style>

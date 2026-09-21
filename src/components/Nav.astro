@@ -1,0 +1,243 @@
+---
+/**
+ * Nav — logo mark + wordmark left; the four sheets + the amber CTA right.
+ * The active item carries box-shadow: inset 0 -6px 0 -5px var(--live), which
+ * reads as a 1px amber underline without moving the text.
+ *
+ * The CTA label states the file type and size (§10: buttons say what
+ * happens). Its size comes from the real PDF — see data/site.ts.
+ *
+ * MOBILE MENU IS UNDESIGNED. 09-COMPONENT-INVENTORY §7 lists "nav open state
+ * on mobile (the hamburger has no designed panel)" as needing a decision.
+ * What ships here is the minimum honest thing: a real disclosure button that
+ * reveals the same four links in the nav's own type scale, built only from
+ * existing tokens. It invents no new visual language and needs sign-off.
+ */
+import Logo from './Logo.astro';
+import { nav, cv, identity } from '../data/site';
+
+interface Props {
+  active?: string;
+}
+const { active = 'Home' } = Astro.props;
+---
+
+<nav class="nav" aria-label="Primary">
+  <!-- The hairline that draws L->R in power-on frame 2. It doubles as the
+       nav's bottom border once the sequence has landed. -->
+  <div class="nav__rule" data-po="rule" aria-hidden="true"></div>
+
+  <a class="nav__brand" href="/" data-po="late">
+    <Logo size={24} class="nav__logo nav__logo--desktop" />
+    <Logo size={20} class="nav__logo nav__logo--mobile" />
+    <span class="nav__wordmark">{identity.name}</span>
+  </a>
+
+  <div class="nav__links" data-po="late">
+    {nav.map((item) => (
+      <a
+        class="nav__link"
+        href={item.href}
+        data-active={item.label === active ? 'true' : undefined}
+        aria-current={item.label === active ? 'page' : undefined}
+      >
+        {item.label}
+      </a>
+    ))}
+    <a class="nav__cta" href={cv.href}>{cv.label}</a>
+  </div>
+
+  <button
+    class="nav__toggle"
+    type="button"
+    aria-expanded="false"
+    aria-controls="nav-panel"
+    aria-label="Menu"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="var(--silk-dim)" stroke-width="1.5" />
+    </svg>
+  </button>
+</nav>
+
+<div class="nav__panel" id="nav-panel" hidden>
+  {nav.map((item) => (
+    <a
+      class="nav__panel-link"
+      href={item.href}
+      data-active={item.label === active ? 'true' : undefined}
+    >
+      {item.label}
+    </a>
+  ))}
+  <a class="nav__panel-cta" href={cv.href}>{cv.label}</a>
+</div>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.nav__toggle');
+  const panel = document.querySelector<HTMLElement>('#nav-panel');
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    if (panel) panel.hidden = open;
+  });
+</script>
+
+<style>
+  .nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px var(--page-margin);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* Sits exactly on the border so the drawn line and the resting border are
+     the same hairline, not two stacked ones. */
+  .nav__rule {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--rule);
+    display: none;
+  }
+
+  .nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Anchored :global(): these target Logo.astro's root, which carries ITS
+     scope id, not this component's. */
+  .nav__brand :global(.nav__logo--mobile) { display: none; }
+
+  .nav__wordmark {
+    font-size: 15px;
+    font-weight: 600;
+    font-stretch: 92%;
+    letter-spacing: -0.01em;
+  }
+
+  .nav__links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .nav__link {
+    color: var(--silk-dim);
+    text-decoration: none;
+    padding-bottom: 2px;
+    transition: color var(--d-base) var(--e-snap);
+  }
+
+  .nav__link:hover { color: var(--silk); }
+
+  .nav__link[data-active] {
+    color: var(--silk);
+    box-shadow: inset 0 -6px 0 -5px var(--live);
+  }
+
+  .nav__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border: 1px solid var(--live);
+    background: var(--live);
+    color: var(--void);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--r-chip);
+    text-decoration: none;
+    transition: background var(--d-base) var(--e-snap),
+                border-color var(--d-base) var(--e-snap);
+  }
+
+  .nav__cta:hover {
+    background: var(--live-deep);
+    border-color: var(--live-deep);
+    color: var(--void);
+  }
+
+  .nav__toggle {
+    display: none;
+    position: relative;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  /* The icon is a 20px glyph and stays one — growing the button to 44px
+     would grow the nav row from 48px to 72px. The target is extended
+     instead, which costs no layout at all. */
+  .nav__toggle::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+  }
+
+  .nav__panel { display: none; }
+
+  @media (max-width: 900px) {
+    .nav { padding: 14px var(--page-margin); }
+    .nav__brand { gap: 10px; }
+    .nav__brand :global(.nav__logo--desktop) { display: none; }
+    .nav__brand :global(.nav__logo--mobile) { display: block; }
+    .nav__wordmark { font-size: 14px; }
+    .nav__links { display: none; }
+    .nav__toggle { display: block; }
+
+    .nav__panel:not([hidden]) {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 8px var(--page-margin) 16px;
+      border-bottom: 1px solid var(--rule);
+      background: var(--void);
+    }
+
+    .nav__panel-link {
+      /* 12px padding against 15px/1.15 type measures 41px, not the 44 the
+         comment claimed. State the floor. */
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 12px 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--silk-dim);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .nav__panel-link[data-active] {
+      color: var(--silk);
+      box-shadow: inset 0 -6px 0 -5px var(--live);
+    }
+
+    .nav__panel-cta {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;              /* same floor as the hero CTA */
+      padding: 13px 16px;
+      background: var(--live);
+      color: var(--void);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: var(--r-chip);
+      text-decoration: none;
+    }
+  }
+</style>

@@ -1,0 +1,97 @@
+---
+/**
+ * FramedScene — the container for a 3D scene or its static fallback
+ * (component inventory 3.1). Four L-shaped registration marks at the corners,
+ * caption bar below.
+ *
+ * The caption is PERSISTENT, never a hover or a tooltip: S3–S5 must always
+ * read "Representative model. Not the client's design." because the boards
+ * are client IP and the model is an abstraction. A caption that can be
+ * dismissed is not a disclosure.
+ *
+ * `scene` names a builder in `public/3d/builders.js`. When it is null the
+ * frame renders empty with its caption — which is the honest state for a
+ * board that has not been fabricated.
+ */
+interface Props {
+  scene: string | null;
+  caption: string;
+  class?: string;
+}
+const { scene, caption, class: className } = Astro.props;
+---
+
+<figure class:list={['framed', className]}>
+  <div class="framed__box" data-scene={scene ?? undefined}>
+    {/* Registration marks: L-shapes, one per corner. */}
+    {['tl', 'tr', 'bl', 'br'].map((c) => (
+      <span class:list={['framed__reg', `framed__reg--${c}`]} aria-hidden="true"></span>
+    ))}
+    {scene && <div class="framed__mount" data-scene-mount></div>}
+    {!scene && <div class="framed__empty" aria-hidden="true"></div>}
+  </div>
+
+  <figcaption class="framed__caption">
+    <svg class="framed__mark" width="14" height="16" viewBox="0 0 14 16" aria-hidden="true">
+      <path d="M7 1 V15" stroke="var(--iso)" stroke-width="1.25" />
+      <path d="M3 4 V12 M11 4 V12" stroke="var(--iso)" stroke-width="1.25" opacity="0.7" />
+    </svg>
+    <span>{caption}</span>
+  </figcaption>
+</figure>
+
+<style>
+  .framed { margin: 0; }
+
+  .framed__box {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-bottom: 0;
+  }
+
+  .framed__mount,
+  .framed__empty { position: absolute; inset: 0; }
+
+  /* Anchored :global(): the stage element is created by JS, so it never
+     carries this component's scope id. Without this it keeps the component's
+     own `height: 100vh` default and the camera frames against the viewport's
+     aspect instead of the frame's — 0.85 where the box is 1.78. */
+  .framed__mount :global(three-d-stage) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* L-shaped registration marks, drawn with two borders each. */
+  .framed__reg {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 0 solid var(--rule-2);
+  }
+
+  .framed__reg--tl { top: 10px; left: 10px; border-top-width: 1px; border-left-width: 1px; }
+  .framed__reg--tr { top: 10px; right: 10px; border-top-width: 1px; border-right-width: 1px; }
+  .framed__reg--bl { bottom: 10px; left: 10px; border-bottom-width: 1px; border-left-width: 1px; }
+  .framed__reg--br { bottom: 10px; right: 10px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  .framed__caption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border: 1px solid var(--rule);
+    font-family: var(--f-data);
+    font-size: 12px;
+    color: var(--silk-dim);
+  }
+
+  .framed__mark { flex: 0 0 auto; }
+
+  @media (max-width: 900px) {
+    .framed__box { aspect-ratio: 4 / 3; }
+    .framed__caption { font-size: 11px; padding: 10px 12px; }
+  }
+</style>

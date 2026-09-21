@@ -1,0 +1,58 @@
+---
+/**
+ * DepthMarker — how much of a domain he owns.
+ *   owned       filled bar, --live
+ *   contributed outlined bar, --iso
+ *   studied     dashed rule, --silk-faint
+ *
+ * Never a percentage, progress bar or star rating (§9.1). Honesty is the
+ * brand, so `studied` is not a failure state and is never styled as one.
+ */
+interface Props {
+  depth: 'owned' | 'contributed' | 'studied';
+  class?: string;
+}
+const { depth, class: className } = Astro.props;
+/* Lowercase, as #3b draws them. They read as data in the mono face, not as
+   headings — and `studied` set in sentence case beside `owned` would look
+   like an apology. */
+const LABEL = { owned: 'owned', contributed: 'contributed', studied: 'studied' } as const;
+---
+
+<span class:list={['depth', `depth--${depth}`, className]}>
+  <span class="depth__bar" aria-hidden="true"></span>
+  <span class="depth__label">{LABEL[depth]}</span>
+</span>
+
+<style>
+  .depth {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--f-data);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .depth__bar {
+    display: block;
+    width: 34px;
+    height: 8px;
+    flex: 0 0 auto;
+  }
+
+  .depth--owned .depth__bar { background: var(--depth-owned); }
+  .depth--owned .depth__label { color: var(--depth-owned); }
+
+  .depth--contributed .depth__bar {
+    border: 1px solid var(--depth-contributed);
+    background: none;
+  }
+  .depth--contributed .depth__label { color: var(--depth-contributed); }
+
+  .depth--studied .depth__bar {
+    height: 0;
+    border-top: 1px dashed var(--depth-studied);
+  }
+  .depth--studied .depth__label { color: var(--depth-studied); }
+</style>

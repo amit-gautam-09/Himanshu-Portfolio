@@ -1,0 +1,119 @@
+---
+/**
+ * 404 — the broken trace.
+ *
+ * The design system already has a vocabulary for this: `TraceVia`'s `broken`
+ * state is a --fault trace with a cross through the via. A 404 is a routing
+ * error, so the page says exactly that and then offers the four real
+ * destinations rather than apologising.
+ */
+import Sheet from '../layouts/Sheet.astro';
+import BrokenRule from '../components/BrokenRule.astro';
+import { nav } from '../data/site';
+---
+
+<Sheet
+  title="Not found — Himanshu Gautam"
+  description="That route does not exist on this site."
+  sheet="—"
+>
+  <div class="bleed">
+    <div class="iso-grid nf">
+      <div class="rail desktop-only">
+        <p class="nf__code">404</p>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        <h1 class="nf__title">No route to that page</h1>
+        <p class="nf__lede">
+          The link is broken, or the page has moved. Nothing here is behind a
+          login, so it is not that.
+        </p>
+
+        <svg class="nf__trace" width="240" height="60" viewBox="0 0 240 60" aria-hidden="true">
+          <path d="M0 12 H70 L100 42 H150" fill="none" stroke="var(--fault)" stroke-width="2" />
+          <path d="M170 42 H240" fill="none" stroke="var(--fault)" stroke-width="2"
+                stroke-dasharray="4 6" opacity="0.6" />
+          <circle cx="160" cy="42" r="7" fill="none" stroke="var(--fault)" stroke-width="2" />
+          <path d="M155 37 L165 47 M165 37 L155 47" stroke="var(--fault)" stroke-width="1.5" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="bleed"><BrokenRule label="Where to instead" /></div>
+
+  <div class="bleed nf-links">
+    <div class="measure nf__grid">
+      {nav.map((item) => (
+        <a class="nf-link" href={item.href}>{item.label}</a>
+      ))}
+    </div>
+  </div>
+</Sheet>
+
+<style>
+  .nf { padding: 72px 0 40px; }
+
+  .nf__code {
+    font-family: var(--f-data);
+    font-size: 40px;
+    color: var(--fault);
+  }
+
+  .nf__title {
+    font-size: 56px;
+    font-weight: 600;
+    font-stretch: 82%;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .nf__lede {
+    margin-top: 16px;
+    font-family: var(--f-read);
+    font-size: 21px;
+    line-height: 1.55;
+    max-width: 52ch;
+    color: var(--silk-dim);
+  }
+
+  .nf__trace { margin-top: 40px; }
+
+  .nf-links { padding-block: 28px 80px; }
+
+  .nf__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+
+  .nf-link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 14px 18px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-board);
+    clip-path: polygon(14px 0, 100% 0, 100% 100%, 0 100%, 0 14px);
+    color: inherit;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    font-stretch: 92%;
+    transition: border-color var(--d-slow) var(--e-probe);
+  }
+
+  .nf-link:hover,
+  .nf-link:focus-visible { border-color: var(--rule-2); }
+
+  @media (max-width: 900px) {
+    .desktop-only { display: none; }
+    .nf { padding: 32px 0 24px; }
+    .nf__title { font-size: 32px; }
+    .nf__lede { font-size: 18px; }
+    .nf__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .nf-links { padding-block: 20px 40px; }
+  }
+</style>

@@ -1,0 +1,140 @@
+---
+/**
+ * DecisionBlock — one decision, on the case study.
+ *
+ * Three kinds, distinguished by a 2px left spine and the chip:
+ *   decision      --live      a choice made deliberately
+ *   problem       --fault     something found that was wrong
+ *   verification  --pass      something checked
+ *
+ * `problem` is NOT styled as a failure. Finding the threshold overlap in
+ * review is the best thing on the page — the spine is red because that is
+ * the taxonomy's colour, not a judgement.
+ *
+ * Found / Did / Result is a fixed three-row structure. `result` is optional
+ * because some decisions have not produced one yet, and inventing one would
+ * be the only dishonest thing this component could do.
+ */
+interface Props {
+  kind: 'decision' | 'problem' | 'verification';
+  stage: string;
+  title: string;
+  found: string;
+  did: string;
+  result?: string;
+  class?: string;
+}
+const { kind, stage, title, found, did, result, class: className } = Astro.props;
+
+const LABEL = {
+  decision: 'Design decision',
+  problem: 'Problem found',
+  verification: 'Verification'
+} as const;
+---
+
+<article class:list={['decision', `decision--${kind}`, className]}>
+  <div class="decision__head">
+    <span class="decision__chip">{LABEL[kind]}</span>
+    <span class="decision__stage">{stage}</span>
+  </div>
+
+  <h3 class="decision__title">{title}</h3>
+
+  <dl class="decision__rows">
+    <dt>Found</dt>
+    <dd>{found}</dd>
+    <dt>Did</dt>
+    <dd>{did}</dd>
+    {result && <dt>Result</dt>}
+    {result && <dd>{result}</dd>}
+  </dl>
+</article>
+
+<style>
+  .decision {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-left: 0;
+    padding: 26px 30px 28px;
+  }
+
+  .decision::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--spine);
+  }
+
+  .decision--decision { --spine: var(--live); }
+  .decision--problem { --spine: var(--fault); }
+  .decision--verification { --spine: var(--pass); }
+
+  .decision__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .decision__chip {
+    font-family: var(--f-data);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: var(--r-chip);
+    border: 1px solid var(--spine);
+    color: var(--spine);
+  }
+
+  .decision__stage {
+    font-family: var(--f-data);
+    font-size: 11px;
+    color: var(--silk-faint);
+  }
+
+  .decision__title {
+    margin-top: 16px;
+    font-size: 26px;
+    font-weight: 600;
+    font-stretch: 88%;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .decision__rows {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 18px 24px;
+  }
+
+  .decision__rows dt {
+    font-size: 12px;
+    color: var(--silk-faint);
+    padding-top: 6px;
+  }
+
+  .decision__rows dd {
+    margin: 0;
+    font-family: var(--f-read);
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--silk);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 900px) {
+    .decision { padding: 20px 18px 22px; }
+    .decision__title { font-size: 21px; }
+    .decision__rows {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 6px 0;
+    }
+    .decision__rows dt { padding-top: 12px; }
+    .decision__rows dd { font-size: 16px; }
+  }
+</style>

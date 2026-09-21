@@ -1,0 +1,125 @@
+---
+/**
+ * /cv — a real page, not a redirect.
+ *
+ * The schema maps /cv to the PDF. A bare redirect loses the one thing a
+ * recruiter landing here wants to know before downloading: how current it is
+ * and what is in it. So the page states both, and the download is one click.
+ */
+import Sheet from '../layouts/Sheet.astro';
+import BrokenRule from '../components/BrokenRule.astro';
+import Chip from '../components/Chip.astro';
+import { cv, identity } from '../data/site';
+import { tools } from '../data/about';
+---
+
+<Sheet
+  title="CV — Himanshu Gautam"
+  description="Curriculum vitae for Himanshu Gautam, hardware engineer in power electronics and PCB design. PDF download."
+  sheet="—"
+>
+  <div class="bleed">
+    <div class="iso-grid cv">
+      <div class="rail desktop-only">
+        <p class="cv__label">Last updated</p>
+        <p class="cv__value">{cv.updated}</p>
+        <p class="cv__label cv__label--spaced">Format</p>
+        <p class="cv__value">PDF</p>
+      </div>
+      <div class="gap desktop-only"></div>
+
+      <div class="content">
+        <h1 class="cv__title">Curriculum vitae</h1>
+        <p class="cv__lede">{identity.discipline} {identity.location}</p>
+
+        <a class="cv__download" href={cv.href} download>{cv.label}</a>
+
+        <p class="cv__note">
+          The same facts are on this site, in more detail and with the
+          reasoning attached. The CV is the short form.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bleed"><BrokenRule label="Tools" /></div>
+
+  <div class="bleed cv-tools">
+    <div class="iso-grid">
+      <div class="rail desktop-only"></div>
+      <div class="gap desktop-only"></div>
+      <div class="content cv__tools">
+        {tools.map((t) => <Chip variant="spec">{t}</Chip>)}
+      </div>
+    </div>
+  </div>
+</Sheet>
+
+<style>
+  .cv { padding: 72px 0 40px; }
+
+  .cv__label { font-size: 12px; color: var(--silk-faint); }
+  .cv__label--spaced { margin-top: 18px; }
+
+  .cv__value {
+    margin-top: 4px;
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk-dim);
+  }
+
+  .cv__title {
+    font-size: 56px;
+    font-weight: 600;
+    font-stretch: 82%;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .cv__lede {
+    margin-top: 16px;
+    font-family: var(--f-read);
+    font-size: 21px;
+    line-height: 1.55;
+    max-width: 56ch;
+    color: var(--silk-dim);
+    text-wrap: pretty;
+  }
+
+  .cv__download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 32px;
+    padding: 13px 22px;
+    background: var(--live);
+    color: var(--void);
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--r-chip);
+    text-decoration: none;
+  }
+
+  .cv__download:hover { background: var(--live-deep); }
+
+  .cv__note {
+    margin-top: 24px;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 46ch;
+    color: var(--silk-faint);
+  }
+
+  .cv-tools { padding-block: 28px 80px; }
+
+  .cv__tools { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 900px) {
+    .desktop-only { display: none; }
+    .cv { padding: 32px 0 24px; }
+    .cv__title { font-size: 32px; }
+    .cv__lede { font-size: 18px; }
+    .cv-tools { padding-block: 20px 40px; }
+  }
+</style>

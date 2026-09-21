@@ -1,0 +1,103 @@
+---
+/**
+ * FilterChips — the capability filter, sheet 3 (component inventory 4.3).
+ *
+ * Active chip is `--live` fill / `--void` text; a count suffixes every label.
+ * Rest is `--rule` border + `--silk-dim`; hover lifts to `--rule-2` +
+ * `--silk`, which is the state the design reference draws on `Power · 3`.
+ *
+ * The counts are passed in already derived from the board data, never
+ * authored, so a chip cannot promise more boards than pressing it reveals.
+ *
+ * Real <button>s in a group, not links: this filters what is already on the
+ * page and must not push history. With JavaScript off the buttons do
+ * nothing and every board stays visible, which is the honest fallback for a
+ * list of five.
+ */
+interface Props {
+  /** Label for the "everything" chip, counted like the rest. */
+  allLabel?: string;
+  facets: { name: string; count: number }[];
+  total: number;
+  class?: string;
+}
+const { allLabel = 'All', facets, total, class: className } = Astro.props;
+---
+
+<div
+  class:list={['filters', className]}
+  role="group"
+  aria-label="Filter boards by capability"
+  data-filters
+>
+  <button
+    class="filters__chip"
+    type="button"
+    data-filter="*"
+    aria-pressed="true"
+  >
+    {allLabel} · {total}
+  </button>
+  {facets.map((f) => (
+    <button
+      class="filters__chip"
+      type="button"
+      data-filter={f.name}
+      aria-pressed="false"
+      disabled={f.count === 0}
+    >
+      {f.name} · {f.count}
+    </button>
+  ))}
+</div>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filters__chip {
+    font-family: var(--f-data);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    padding: 7px 12px;
+    /* 32px in the reference; 7px padding on a 12px/1 label is 26px, so the
+       floor is stated rather than inferred from the type metrics. Also
+       clears WCAG 2.5.8 with the 8px gap. */
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-chip);
+    background: transparent;
+    color: var(--silk-dim);
+    cursor: pointer;
+    transition:
+      border-color var(--d-base) var(--e-probe),
+      color var(--d-base) var(--e-probe);
+  }
+
+  .filters__chip:hover:not([aria-pressed='true']):not([disabled]) {
+    border-color: var(--rule-2);
+    color: var(--silk);
+  }
+
+  .filters__chip[aria-pressed='true'] {
+    background: var(--live);
+    border-color: var(--live);
+    color: var(--void);
+  }
+
+  .filters__chip[disabled] {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  @media (max-width: 900px) {
+    .filters { gap: 6px; }
+    .filters__chip { font-size: 11px; padding: 7px 10px; }
+  }
+</style>

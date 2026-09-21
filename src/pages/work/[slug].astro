@@ -1,0 +1,530 @@
+---
+/**
+ * Sheet 2 — the case study, one page per board. Design reference turn #2a.
+ *
+ * Five instances from one template, statically generated. The sections are a
+ * fixed order and every board answers the same questions in the same place:
+ * what it is, how it is put together, what was decided, how it was checked,
+ * and — for the client boards — what is not shown and why.
+ *
+ * `notShown` is not boilerplate. Three of these boards are Gessler GmbH
+ * intellectual property and the page says so in his own words rather than
+ * letting a reader conclude the work is thin.
+ */
+import Sheet from '../../layouts/Sheet.astro';
+import BrokenRule from '../../components/BrokenRule.astro';
+import SpecRail from '../../components/SpecRail.astro';
+import Chip from '../../components/Chip.astro';
+import FramedScene from '../../components/FramedScene.astro';
+import SignalChain from '../../components/SignalChain.astro';
+import DecisionBlock from '../../components/DecisionBlock.astro';
+import IsolationPanel from '../../components/IsolationPanel.astro';
+import { cases } from '../../data/cases';
+
+export function getStaticPaths() {
+  return cases.map((c, i) => ({
+    params: { slug: c.slug },
+    props: {
+      study: c,
+      prev: i > 0 ? cases[i - 1] : cases[cases.length - 1],
+      next: i < cases.length - 1 ? cases[i + 1] : cases[0]
+    }
+  }));
+}
+
+const { study, prev, next } = Astro.props;
+
+/* Same import map and SRI hashes as the hero: the scenes are vanilla ES
+   modules resolved by the browser, not bundled. */
+const importMap = {
+  imports: {
+    three: 'https://unpkg.com/three@0.184.0/build/three.module.js',
+    'three/addons/controls/OrbitControls.js':
+      'https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js'
+  },
+  integrity: {
+    'https://unpkg.com/three@0.184.0/build/three.module.js':
+      'sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J',
+    'https://unpkg.com/three@0.184.0/build/three.core.js':
+      'sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT',
+    'https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js':
+      'sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9'
+  }
+};
+---
+
+<Sheet
+  title={`${study.title} — Himanshu Gautam`}
+  description={study.lede}
+  active="Work"
+  sheet="2 of 5"
+>
+  {/* ── Masthead ─────────────────────────────────────────────────────── */}
+  <div class="bleed">
+    <div class="iso-grid case-head">
+      <div class="rail desktop-only">
+        <p class="case__designator">{study.designator}</p>
+      </div>
+      <div class="gap desktop-only"></div>
+
+      <div class="content">
+        <h1 class="case__title">{study.title}</h1>
+        <p class="case__lede">{study.lede}</p>
+
+        <div class="case__chips">
+          <Chip variant="status-released" class={study.status.kind === 'progress' ? 'is-progress' : undefined}>
+            {study.status.label}
+          </Chip>
+          {study.chips.map((c) => <Chip variant="standard">{c}</Chip>)}
+          {study.confidential && <Chip variant="confidential">Confidential</Chip>}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Scene + spec rail ────────────────────────────────────────────── */}
+  <div class="bleed">
+    <div class="iso-grid case-scene">
+      <div class="rail desktop-only"><SpecRail items={study.rail} /></div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        <FramedScene scene={study.scene} caption={study.sceneCaption} />
+      </div>
+    </div>
+  </div>
+
+  {/* ── What it is ───────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="What it is" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid case-prose">
+      <div class="rail desktop-only"></div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        {study.whatItIs.map((p) => <p class="case__para">{p}</p>)}
+      </div>
+    </div>
+  </div>
+
+  {/* ── Architecture ─────────────────────────────────────────────────── */}
+  {study.signalChain && (
+    <>
+      <div class="bleed"><BrokenRule label="Architecture" /></div>
+      <div class="bleed">
+        <div class="iso-grid case-arch">
+          <div class="rail desktop-only">
+            <p class="case__rail-label">Signal chain</p>
+            <p class="case__rail-note">{study.signalChain.note}</p>
+          </div>
+          <div class="gap desktop-only"></div>
+          <div class="content">
+            <SignalChain
+              note={study.signalChain.note}
+              barrier={study.signalChain.barrier}
+              primary={study.signalChain.primary}
+              secondary={study.signalChain.secondary}
+              transformers={study.signalChain.transformers}
+              tap={study.signalChain.tap}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  )}
+
+  {/* ── Decisions ────────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Decisions" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid case-decisions">
+      <div class="rail desktop-only">
+        <p class="case__rail-label">Kind</p>
+        <ul class="case__legend">
+          <li class="case__legend-item case__legend-item--decision">Design decision</li>
+          <li class="case__legend-item case__legend-item--problem">Problem found</li>
+          <li class="case__legend-item case__legend-item--verification">Verification</li>
+        </ul>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content case__decisions">
+        {study.decisions.map((d) => (
+          <DecisionBlock
+            kind={d.kind}
+            stage={d.stage}
+            title={d.title}
+            found={d.found}
+            did={d.did}
+            result={d.result}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {/* ── Retrospective (U1 only) ──────────────────────────────────────── */}
+  {study.retrospective && (
+    <>
+      <div class="bleed"><BrokenRule label="What I would do differently now" emphasis="strong" /></div>
+      <div class="bleed">
+        <div class="iso-grid case-retro">
+          <div class="rail desktop-only">
+            <p class="case__rail-label">Written against my own board</p>
+            <p class="case__rail-note">
+              The most useful thing on this site is the distance between this
+              list and the work above it.
+            </p>
+          </div>
+          <div class="gap desktop-only"></div>
+          <div class="content">
+            {study.retrospective.map((g) => (
+              <section class="case__retro-group">
+                <h3 class="case__retro-heading">{g.heading}</h3>
+                <ul class="case__retro-list">
+                  {g.items.map((it) => <li>{it}</li>)}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  )}
+
+  {/* ── Verification ─────────────────────────────────────────────────── */}
+  {study.verification && (
+    <>
+      <div class="bleed"><BrokenRule label="Verification" /></div>
+      <div class="bleed">
+        <div class="iso-grid case-verify">
+          <div class="rail desktop-only">
+            {study.verification.checked && (
+              <>
+                <p class="case__rail-label">Checked</p>
+                <ul class="case__checked">
+                  {study.verification.checked.map((c) => <li>{c}</li>)}
+                </ul>
+              </>
+            )}
+            {study.verification.tool && (
+              <>
+                <p class="case__rail-label case__rail-label--spaced">Tool</p>
+                <p class="case__rail-value">{study.verification.tool}</p>
+              </>
+            )}
+          </div>
+          <div class="gap desktop-only"></div>
+          <div class="content">
+            <h2 class="case__h2">{study.verification.title}</h2>
+            {study.verification.prose.map((p) => <p class="case__para">{p}</p>)}
+            {study.verification.quote && (
+              <blockquote class="case__quote">{study.verification.quote}</blockquote>
+            )}
+
+            {study.notShown && (
+              <IsolationPanel class="case__not-shown" heading="What is not shown here, and why">
+                {study.notShown.map((p) => <p class="case__not-shown-para">{p}</p>)}
+              </IsolationPanel>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  )}
+
+  {/* ── Other boards ─────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Other boards" /></div>
+
+  <div class="bleed case-nav">
+    <div class="measure case__nav-grid">
+      <a class="case-link" href={`/work/${prev.slug}`}>
+        <span class="case-link__dir">Previous</span>
+        <span class="case-link__body">
+          <span class="case-link__designator">{prev.designator}</span>
+          <span class="case-link__title">{prev.title}</span>
+        </span>
+      </a>
+      <a class="case-link case-link--next" href={`/work/${next.slug}`}>
+        <span class="case-link__dir">Next</span>
+        <span class="case-link__body">
+          <span class="case-link__designator">{next.designator}</span>
+          <span class="case-link__title">{next.title}</span>
+        </span>
+      </a>
+    </div>
+  </div>
+  {study.scene && (
+    <>
+      <script is:inline type="importmap" set:html={JSON.stringify(importMap)} />
+      <script is:inline defer src="/3d/three-d-stage.js"></script>
+      <script is:inline type="module" src="/3d/case-scene.js"></script>
+    </>
+  )}
+</Sheet>
+
+<style>
+  .case-head { padding: 56px 0 36px; }
+
+  .case__designator {
+    font-size: 40px;
+    font-weight: 600;
+    font-stretch: 85%;
+    letter-spacing: -0.02em;
+    color: var(--rule-2);
+  }
+
+  .case__title {
+    font-size: 56px;
+    font-weight: 600;
+    font-stretch: 80%;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .case__lede {
+    margin-top: 16px;
+    font-family: var(--f-read);
+    font-size: 22px;
+    line-height: 1.45;
+    max-width: 58ch;
+    color: var(--silk-dim);
+    text-wrap: pretty;
+  }
+
+  .case__chips {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .case-scene { padding: 0 0 56px; }
+
+  .case-prose { padding: 40px 0 56px; }
+  .case-arch { padding: 40px 0 56px; }
+  .case-decisions { padding: 40px 0 56px; }
+  .case-retro { padding: 40px 0 56px; }
+  .case-verify { padding: 40px 0 56px; }
+
+  .case__para {
+    font-family: var(--f-read);
+    font-size: 21px;
+    line-height: 1.62;
+    max-width: 62ch;
+    color: var(--silk);
+    text-wrap: pretty;
+  }
+
+  .case__para + .case__para { margin-top: 24px; }
+
+  .case__h2 {
+    font-size: 34px;
+    font-weight: 600;
+    font-stretch: 85%;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 22px;
+    max-width: 22ch;
+  }
+
+  .case__quote {
+    margin: 34px 0 0;
+    padding: 24px 28px;
+    background: var(--panel);
+    border-left: 2px solid var(--live);
+    font-family: var(--f-read);
+    font-size: 24px;
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+
+  .case__rail-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .case__rail-label--spaced { margin-top: 20px; }
+
+  .case__rail-note {
+    margin-top: 8px;
+    font-family: var(--f-data);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--silk-dim);
+    max-width: 32ch;
+  }
+
+  .case__rail-value {
+    margin-top: 4px;
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk-dim);
+  }
+
+  .case__checked {
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--f-data);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--silk-dim);
+  }
+
+  .case__legend {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .case__legend-item {
+    padding-left: 10px;
+    border-left: 2px solid var(--spine);
+    font-size: 13px;
+    color: var(--silk-dim);
+  }
+
+  .case__legend-item--decision { --spine: var(--live); }
+  .case__legend-item--problem { --spine: var(--fault); }
+  .case__legend-item--verification { --spine: var(--pass); }
+
+  .case__decisions {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .case__retro-group + .case__retro-group { margin-top: 34px; }
+
+  .case__retro-heading {
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--iso);
+    margin-bottom: 12px;
+  }
+
+  .case__retro-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .case__retro-list li {
+    position: relative;
+    padding-left: 22px;
+    font-family: var(--f-read);
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--silk-dim);
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .case__retro-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 13px;
+    width: 10px;
+    height: 1px;
+    background: var(--rule-2);
+  }
+
+  .content :global(.case__not-shown) { margin-top: 40px; }
+
+  .case__not-shown-para {
+    font-family: var(--f-read);
+    font-size: 19px;
+    line-height: 1.66;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .case__not-shown-para + .case__not-shown-para { margin-top: 18px; }
+
+  .case-nav { padding-block: 28px 72px; }
+
+  .case__nav-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+
+  .case-link {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 24px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-board);
+    clip-path: polygon(14px 0, 100% 0, 100% 100%, 0 100%, 0 14px);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color var(--d-slow) var(--e-probe);
+  }
+
+  .case-link:hover,
+  .case-link:focus-visible { border-color: var(--rule-2); }
+
+  .case-link--next { text-align: right; }
+
+  .case-link__dir {
+    font-size: 12px;
+    color: var(--silk-faint);
+  }
+
+  .case-link__body {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .case-link--next .case-link__body { justify-content: flex-end; }
+
+  .case-link__designator {
+    font-family: var(--f-data);
+    font-size: 12px;
+    color: var(--iso);
+  }
+
+  .case-link__title {
+    font-size: 17px;
+    font-weight: 600;
+    font-stretch: 92%;
+    letter-spacing: -0.01em;
+  }
+
+  @media (max-width: 900px) {
+    .desktop-only { display: none; }
+
+    .case-head { padding: 24px 0 20px; }
+    .case__title { font-size: 32px; letter-spacing: -0.02em; }
+    .case__lede { margin-top: 12px; font-size: 18px; }
+    .case__chips { margin-top: 18px; }
+
+    .case-scene { padding: 0 0 28px; }
+    .case-prose,
+    .case-arch,
+    .case-decisions,
+    .case-retro,
+    .case-verify { padding: 20px 0 28px; }
+
+    .case__para { font-size: 18px; line-height: 1.58; }
+    .case__h2 { font-size: 26px; max-width: none; }
+    .case__quote { font-size: 20px; padding: 18px 20px; margin-top: 24px; }
+    .case__retro-list li { font-size: 17px; }
+    .case__not-shown-para { font-size: 17px; }
+
+    .case-nav { padding-block: 20px 32px; }
+    .case__nav-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .case-link--next { text-align: left; }
+    .case-link--next .case-link__body { justify-content: flex-start; }
+  }
+</style>

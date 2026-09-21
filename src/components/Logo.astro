@@ -1,0 +1,52 @@
+---
+/**
+ * Logo — the isolation mark: two creepage arcs split by a double barrier bar.
+ *
+ * `tone="split"` (default) is the mark proper: amber primary arc, ice
+ * secondary arc. Never recolour the two arcs to match each other -- the
+ * warm/cool split IS the mark (component inventory 1.1).
+ *
+ * `tone="iso"` is the one sanctioned exception, used by IsolationPanel: the
+ * panel sits wholly on the isolated side of the barrier, so the design
+ * reference draws both arcs in --iso there. Do not use it anywhere else.
+ */
+interface Props {
+  size?: number;
+  tone?: 'split' | 'iso';
+  class?: string;
+}
+const { size = 24, tone = 'split', class: className } = Astro.props;
+const primary = tone === 'iso' ? 'var(--iso)' : 'var(--live)';
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  class:list={['logo', className]}
+  aria-hidden="true"
+>
+  <path
+    d="M8 5a3 3 0 0 1 0 4.6 3 3 0 0 1 0 4.6 3 3 0 0 1 0 4.8"
+    stroke={primary}
+    stroke-width="1.25"
+    stroke-linecap="round"
+  />
+  <path
+    d="M16 5a3 3 0 0 0 0 4.6 3 3 0 0 0 0 4.6 3 3 0 0 0 0 4.8"
+    stroke="var(--iso)"
+    stroke-width="1.25"
+    stroke-linecap="round"
+  />
+  <path
+    d="M11.2 3.5v17M12.8 3.5v17"
+    stroke="var(--silk)"
+    stroke-width="1.25"
+    stroke-linecap="round"
+  />
+</svg>
+
+<style>
+  .logo { flex: 0 0 auto; }
+</style>

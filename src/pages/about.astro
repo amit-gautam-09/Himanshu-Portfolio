@@ -1,0 +1,292 @@
+---
+/**
+ * Sheet 4 — About. Design reference turn #3b (1440).
+ *
+ * Purpose: state the shape of a one-year career without inflating it, and
+ * make the distance between the 2023 student board and today's work the
+ * argument rather than the embarrassment. The prose does that; the capability
+ * matrix does it again in a table, which is why `studied` is set exactly like
+ * `owned` and never styled as a failure.
+ *
+ * Every section is rail + content on the isolation grid. No mobile artboard
+ * exists for this sheet, so it follows #1b's rules — the grid collapses at
+ * 900px on its own (base.css) and the rail content moves above.
+ */
+import Sheet from '../layouts/Sheet.astro';
+import BrokenRule from '../components/BrokenRule.astro';
+import SpecRail from '../components/SpecRail.astro';
+import Timeline from '../components/Timeline.astro';
+import CapabilityRow from '../components/CapabilityRow.astro';
+import DepthMarker from '../components/DepthMarker.astro';
+import IsolationPanel from '../components/IsolationPanel.astro';
+import Chip from '../components/Chip.astro';
+import { workAuthorisation } from '../data/boards';
+import {
+  aboutRail, aboutProse, timeline, capabilityMatrix, tools, credentials
+} from '../data/about';
+---
+
+<Sheet
+  title="About — Himanshu Gautam"
+  description="One year designing power electronics professionally, a 2023 student satellite, and the distance between them. Timeline, capability matrix with depth markers, tools and recognition."
+  active="About"
+  sheet="4 of 5"
+>
+  {/* ── Masthead ─────────────────────────────────────────────────────── */}
+  <div class="bleed">
+    <div class="iso-grid about-head">
+      <div class="rail desktop-only">
+        <p class="about__sheet">Sheet 4 of 5</p>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        <h1 class="about__title">About</h1>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Where I am, honestly ─────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Where I am, honestly" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid about-prose">
+      <div class="rail desktop-only"><SpecRail items={aboutRail} /></div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        {aboutProse.map((p) => (
+          <p class:list={['about__para', { 'about__para--lead': p.lead }]}>{p.text}</p>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {/* ── Timeline ─────────────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Timeline" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid about-timeline">
+      <div class="rail desktop-only"><p class="about__rail-label">2020 to now</p></div>
+      <div class="gap desktop-only"></div>
+      <div class="content"><Timeline entries={timeline} /></div>
+    </div>
+  </div>
+
+  {/* ── Capability matrix ────────────────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Capability matrix" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid about-matrix">
+      <div class="rail desktop-only">
+        <p class="about__rail-label">Depth marker</p>
+        {/* The legend is the key to the column on the right. Three static
+            markers, no labels repeated — the rows carry those. */}
+        <div class="about__legend">
+          <DepthMarker depth="owned" />
+          <DepthMarker depth="contributed" />
+          <DepthMarker depth="studied" />
+        </div>
+      </div>
+      <div class="gap desktop-only"></div>
+      <div class="content">
+        {capabilityMatrix.map((c, i) => (
+          <CapabilityRow
+            name={c.name}
+            description={c.description}
+            mobileDescription={c.mobileDescription}
+            depth={c.depth}
+            last={i === capabilityMatrix.length - 1}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {/* ── Tools, education, recognition ────────────────────────────────── */}
+  <div class="bleed"><BrokenRule label="Tools, education, recognition" /></div>
+
+  <div class="bleed">
+    <div class="iso-grid about-facts">
+      <div class="rail desktop-only"><p class="about__rail-label">Stated plainly</p></div>
+      <div class="gap desktop-only"></div>
+      <div class="content about__facts-grid">
+        <div>
+          <p class="about__facts-label">Tools</p>
+          <div class="about__tools">
+            {tools.map((t) => <Chip variant="spec">{t}</Chip>)}
+          </div>
+        </div>
+
+        <div class="about__credentials">
+          <div>
+            <p class="about__facts-label">Education</p>
+            <p class="about__degree">{credentials.education.degree}</p>
+            <p class="about__degree-detail">{credentials.education.detail}</p>
+          </div>
+          <div>
+            <p class="about__facts-label">Patent</p>
+            <p class="about__degree">{credentials.patent}</p>
+          </div>
+          <div>
+            <p class="about__facts-label">Recognition</p>
+            {credentials.recognition.map((r) => <p class="about__recognition">{r}</p>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* ── Work authorisation ───────────────────────────────────────────── */}
+  <div class="bleed about-auth">
+    <div class="measure">
+      <IsolationPanel split heading="Work authorisation">
+        <div class="about__auth-grid">
+          {workAuthorisation.map((f) => (
+            <div>
+              <div class="about__auth-label">{f.label}</div>
+              <div class="about__auth-value">{f.value}</div>
+            </div>
+          ))}
+        </div>
+      </IsolationPanel>
+    </div>
+  </div>
+</Sheet>
+
+<style>
+  /* These are on the .iso-grid, not the .bleed, so the shorthand is safe
+     here — it would reset padding-inline on a .bleed. */
+  .about-head { padding: 56px 0 84px; }
+
+  .about__sheet {
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk-faint);
+  }
+
+  .about__title {
+    font-size: 64px;
+    font-weight: 600;
+    font-stretch: 82%;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+  }
+
+  .about-prose { padding: 40px 0 57px; }
+
+  .about__para {
+    font-family: var(--f-read);
+    font-size: 21px;
+    line-height: 1.62;
+    max-width: 62ch;
+    color: var(--silk-dim);
+    text-wrap: pretty;
+  }
+
+  .about__para + .about__para { margin-top: 26px; }
+
+  /* The claim and the conclusion, at full strength. */
+  .about__para--lead { color: var(--silk); }
+
+  .about-timeline { padding: 40px 0 38px; }
+  .about-matrix { padding: 65px 0 56px; }
+  .about-facts { padding: 40px 0 0; }
+
+  .about__rail-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .about__legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .about__facts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+
+  .about__facts-label {
+    font-size: 12px;
+    color: var(--silk-faint);
+    margin-bottom: 10px;
+  }
+
+  .about__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .about__credentials {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .about__degree {
+    font-size: 17px;
+    font-weight: 600;
+    font-stretch: 92%;
+    letter-spacing: -0.01em;
+  }
+
+  .about__degree-detail {
+    margin-top: 2px;
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--iso);
+  }
+
+  .about__recognition {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* padding-BLOCK: this class is on the .bleed element, and the shorthand
+     would reset its padding-inline to 0, floating the panel 12px outside the
+     page margin. Same trap as .work-boards on sheet 3. */
+  .about-auth { padding-block: 44px 72px; }
+
+  .about__auth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 32px;
+  }
+
+  .about__auth-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .about__auth-value {
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk);
+    margin-top: 4px;
+  }
+
+  @media (max-width: 900px) {
+    .desktop-only { display: none; }
+
+    .about__title { font-size: 40px; letter-spacing: -0.02em; }
+
+    .about__para { font-size: 18px; line-height: 1.58; }
+    .about__para + .about__para { margin-top: 20px; }
+
+    .about-head { padding: 24px 0 28px; }
+    .about-prose { padding: 20px 0 28px; }
+    .about-timeline,
+    .about-matrix { padding: 20px 0 28px; }
+    .about-facts { padding: 20px 0 0; }
+
+    .about__facts-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    .about__auth-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .about-auth { padding-block: 28px 0; }
+  }
+</style>

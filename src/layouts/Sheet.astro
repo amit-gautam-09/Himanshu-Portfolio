@@ -1,0 +1,118 @@
+---
+/**
+ * Sheet — the page shell every sheet shares: fonts, tokens, the ground
+ * texture, the single continuous barrier, nav and title block.
+ *
+ * The barrier is ONE hairline down the centre of column 4 spanning the full
+ * page height, annotated exactly once (build note 1). It is rendered here,
+ * not per section.
+ */
+import Nav from '../components/Nav.astro';
+import { identity } from '../data/site';
+import TitleBlockFooter from '../components/TitleBlockFooter.astro';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/power-on.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Nav item to mark current. */
+  active?: string;
+  /** Title-block sheet number, e.g. "1 of 5". */
+  sheet: string;
+}
+const { title, description, active = 'Home', sheet } = Astro.props;
+
+/**
+ * JSON-LD. One Person, emitted on every page so any entry point carries it,
+ * and only facts that are also visible on the site — a knowsAbout list that
+ * the pages do not support would be the same overclaiming the copy avoids.
+ */
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: identity.name,
+  jobTitle: 'Hardware Engineer, Power Electronics and PCB Design',
+  email: identity.email.replace('mailto:', ''),
+  url: Astro.site?.href,
+  worksFor: { '@type': 'Organization', name: 'Gessler GmbH' },
+  alumniOf: {
+    '@type': 'CollegeOrUniversity',
+    name: 'Ajay Kumar Garg Engineering College'
+  },
+  knowsAbout: [
+    'Switch-mode power conversion',
+    'Power factor correction',
+    'Flyback transformer specification',
+    'Impedance-controlled PCB layout',
+    'IEC 61000-3-2',
+    'CE marking'
+  ]
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Archivo's variable wdth axis is required — do not substitute a
+         static cut. The hero sets wdth 78, subheads 82-88, labels 105. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+
+    <!-- Decides whether the power-on sequence runs, BEFORE first paint.
+         A returning visitor this session, or anyone who prefers reduced
+         motion, gets a page that is already complete -- never a frame of
+         void followed by a catch-up. -->
+    <script is:inline>
+      try {
+        if (
+          !sessionStorage.getItem('hasSeenPowerOn') &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+          document.documentElement.dataset.powerOn = 'pending';
+        }
+      } catch (e) {
+        /* storage blocked: skip the sequence rather than risk a stuck page */
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="sheet ground">
+      <!-- the one barrier, column 4, full height -->
+      <div class="barrier-track" aria-hidden="true">
+        <div class="measure"><div class="barrier"></div></div>
+      </div>
+
+      <Nav active={active} />
+      <main id="main"><slot /></main>
+      <TitleBlockFooter sheet={sheet} />
+    </div>
+
+    <script>
+      import '../scripts/power-on.js';
+      import '../scripts/reveal.js';
+      import '../scripts/metric-count.js';
+      import '../scripts/trace-fit.js';
+    </script>
+  </body>
+</html>

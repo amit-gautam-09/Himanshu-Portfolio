@@ -1,0 +1,64 @@
+---
+/**
+ * SpecRail — the left column, 3 of 12. A stack of {label, value}.
+ *
+ * Desktop: the rail, sitting on the primary side of the barrier.
+ * Mobile: collapses to a 2-column spec strip ABOVE the content, not below it
+ * (component inventory 2.1, build note 3). The caller places it accordingly.
+ */
+interface Props {
+  items: { label: string; value: string }[];
+  /** Renders the 390 spec strip: 2 columns, rules top and bottom. */
+  strip?: boolean;
+  sticky?: boolean;
+  class?: string;
+}
+const { items, strip = false, sticky = false, class: className } = Astro.props;
+---
+
+<div
+  class:list={['spec-rail', { 'spec-rail--strip': strip, 'spec-rail--sticky': sticky }, className]}
+>
+  {items.map((item) => (
+    <div class="spec-rail__item">
+      <div class="spec-rail__label">{item.label}</div>
+      <div class="spec-rail__value">{item.value}</div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .spec-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .spec-rail--sticky { position: sticky; top: 24px; }
+
+  .spec-rail__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .spec-rail__value {
+    font-family: var(--f-data);
+    font-size: 13px;
+    color: var(--silk-dim);
+    margin-top: 3px;
+  }
+
+  /* The 390 spec strip */
+  .spec-rail--strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 20px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 0;
+  }
+
+  .spec-rail--strip .spec-rail__label { font-size: 11px; }
+  .spec-rail--strip .spec-rail__value { font-size: 12px; margin-top: 2px; }
+</style>

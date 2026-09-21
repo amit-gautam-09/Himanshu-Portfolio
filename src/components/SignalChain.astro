@@ -1,0 +1,273 @@
+---
+/**
+ * SignalChain — the isolation diagram, sheet 2.
+ *
+ * GEOMETRY RULE: this is ONE CSS grid with EXPLICIT row numbers. The barrier
+ * lives in column 2 and spans every row; each transformer is placed on the
+ * same `grid-row` as the secondary stage it feeds. Aligning the two sides
+ * with pixel offsets or margins is the thing that drifted out of alignment in
+ * the design's own first implementation — a row number cannot drift.
+ *
+ * Row 1 holds the side labels. Stages take the even rows and the arrows
+ * between them take the odd ones, so a stage and the transformer that serves
+ * it share one even number, stated in the data.
+ *
+ * The barrier is the page's own idea made literal: nothing crosses it but the
+ * transformer. The hot side is `--live`, the isolated side is `--iso`, and the
+ * creepage distance is annotated once.
+ */
+interface Props {
+  note: string;
+  barrier: string;
+  primary: { title: string; detail: string; hot?: boolean }[];
+  secondary: { title: string; detail: string; row: number }[];
+  transformers: { label: string; row: number }[];
+  tap?: { label: string; row: number };
+  class?: string;
+}
+const { note, barrier, primary, secondary, transformers, tap, class: className } =
+  Astro.props;
+
+/**
+ * Row 1 holds the two side labels. Primary stage i then sits on row 2+i*2
+ * (2, 4, 6, 8) with an arrow on the odd row between. A transformer and the
+ * secondary stage it feeds name that same even row in the data, so the two
+ * sides line up by NUMBER — never by a margin that has to be re-tuned when
+ * the copy changes length.
+ */
+const rowOf = (i: number) => i * 2 + 2;
+const lastRow = Math.max(
+  rowOf(primary.length - 1),
+  ...secondary.map((s) => s.row),
+  ...transformers.map((t) => t.row)
+);
+---
+
+<div class:list={['chain', className]} style={`--chain-rows:${lastRow}`}>
+  <p class="chain__side chain__side--hot" style="grid-column:1;grid-row:1">
+    Primary side — energised
+  </p>
+  <p class="chain__side chain__side--cold" style="grid-column:3;grid-row:1">
+    Secondary side — isolated
+  </p>
+
+  {/* Column 2, every row. Nothing else may occupy it. */}
+  <div class="chain__barrier" style={`grid-column:2;grid-row:1 / ${lastRow + 1}`}>
+    <span class="chain__barrier-line"></span>
+    <span class="chain__barrier-line"></span>
+    <span class="chain__creepage">{barrier}</span>
+  </div>
+
+  {primary.map((s, i) => (
+    <>
+      <div
+        class:list={['chain__stage', { 'chain__stage--hot': s.hot }]}
+        style={`grid-column:1;grid-row:${rowOf(i)}`}
+      >
+        <p class="chain__stage-title">{s.title}</p>
+        <p class="chain__stage-detail">{s.detail}</p>
+        {s.hot && (
+          <svg class="chain__hazard" width="16" height="14" viewBox="0 0 16 14"
+               role="img" aria-label="Energised — mains potential">
+            <path d="M8 1.5 L15 12.5 H1 Z" fill="none" stroke="var(--live)" stroke-width="1.25" />
+            <path d="M8.6 5 L6.6 8.2 H8.2 L7.4 10.6 L9.4 7.4 H7.8 Z" fill="var(--live)" />
+          </svg>
+        )}
+      </div>
+      {i < primary.length - 1 && (
+        <span class="chain__arrow" style={`grid-column:1;grid-row:${rowOf(i) + 1}`} aria-hidden="true">↓</span>
+      )}
+    </>
+  ))}
+
+  {secondary.map((s, i) => (
+    <>
+      <div class="chain__stage" style={`grid-column:3;grid-row:${s.row}`}>
+        <p class="chain__stage-title">{s.title}</p>
+        <p class="chain__stage-detail">{s.detail}</p>
+      </div>
+      {i < secondary.length - 1 && secondary[i + 1].row === s.row + 2 && (
+        <span class="chain__arrow" style={`grid-column:3;grid-row:${s.row + 1}`} aria-hidden="true">↓</span>
+      )}
+    </>
+  ))}
+
+  {/* The ONLY thing that crosses. Same row as the stage it serves. */}
+  {transformers.map((t) => (
+    <div class="chain__transformer" style={`grid-column:2;grid-row:${t.row}`}>
+      <svg width="22" height="26" viewBox="0 0 22 26" aria-hidden="true">
+        <path d="M4 2 V24 M7 2 V24" stroke="var(--live)" stroke-width="1.5" />
+        <path d="M11 2 V24" stroke="var(--rule-2)" stroke-width="1" stroke-dasharray="3 3" />
+        <path d="M15 2 V24 M18 2 V24" stroke="var(--iso)" stroke-width="1.5" />
+      </svg>
+      <span class="chain__transformer-label">{t.label}</span>
+    </div>
+  ))}
+
+  {tap && (
+    <p class="chain__tap" style={`grid-column:1;grid-row:${tap.row}`}>
+      <span class="chain__tap-mark" aria-hidden="true"></span>
+      {tap.label}
+    </p>
+  )}
+
+  <p class="chain__note">{note}</p>
+</div>
+
+<style>
+  .chain {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
+    grid-template-rows: repeat(var(--chain-rows), auto);
+    column-gap: var(--gutter);
+    row-gap: 6px;
+    align-items: start;
+  }
+
+  .chain__side {
+    font-family: var(--f-data);
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .chain__side--hot { color: var(--live); }
+  .chain__side--cold { color: var(--iso); }
+
+  /* Column 2, full height. The two hairlines ARE the creepage gap. */
+  .chain__barrier {
+    position: relative;
+    justify-self: center;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    height: 100%;
+    padding-top: 26px;
+  }
+
+  .chain__barrier-line {
+    width: 1px;
+    background: var(--rule-2);
+  }
+
+  .chain__creepage {
+    position: absolute;
+    top: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--f-data);
+    font-size: 11px;
+    color: var(--iso);
+    background: var(--void);
+    padding: 2px 4px;
+    white-space: nowrap;
+  }
+
+  .chain__stage {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-board);
+    padding: 14px 16px;
+  }
+
+  .chain__stage--hot { border-color: rgb(242 169 59 / 0.45); }
+
+  .chain__stage-title {
+    font-size: 15px;
+    font-weight: 600;
+    font-stretch: 92%;
+    letter-spacing: -0.01em;
+  }
+
+  .chain__stage-detail {
+    margin-top: 4px;
+    font-family: var(--f-data);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--silk-dim);
+  }
+
+  .chain__hazard {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+  }
+
+  .chain__arrow {
+    justify-self: center;
+    font-size: 13px;
+    line-height: 1;
+    color: var(--silk-faint);
+  }
+
+  .chain__transformer {
+    justify-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: var(--void);
+    padding: 4px 0;
+  }
+
+  .chain__transformer-label {
+    font-family: var(--f-data);
+    font-size: 11px;
+    color: var(--silk-faint);
+  }
+
+  .chain__tap {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--f-data);
+    font-size: 11px;
+    color: var(--silk-faint);
+  }
+
+  .chain__tap-mark {
+    width: 2px;
+    height: 22px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--rule-2) 0 3px,
+      transparent 3px 6px
+    );
+  }
+
+  .chain__note {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    /* No barrier to draw across at 390: the chain becomes one column and the
+       transformer is stated in words instead of drawn between them. */
+    .chain {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 10px;
+    }
+
+    .chain > * {
+      grid-column: 1 !important;
+      grid-row: auto !important;
+    }
+
+    .chain__barrier { display: none; }
+
+    .chain__note {
+      display: block;
+      order: -1;
+      font-family: var(--f-data);
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--iso);
+      margin-bottom: 4px;
+    }
+
+    .chain__transformer { flex-direction: row; gap: 8px; }
+  }
+</style>

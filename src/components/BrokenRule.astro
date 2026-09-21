@@ -1,0 +1,56 @@
+---
+/**
+ * BrokenRule — section separator.
+ * A hairline, a label, then a longer hairline: the label interrupts the rule
+ * rather than sitting above it. Ratio is 1fr / label / 3fr (2fr on mobile).
+ * Used 12x across the five sheets.
+ */
+interface Props {
+  label: string;
+  /** `strong` lifts the label from --silk-dim to --silk. */
+  emphasis?: 'normal' | 'strong';
+  class?: string;
+}
+const { label, emphasis = 'normal', class: className } = Astro.props;
+---
+
+<div class:list={['broken-rule', className]} data-emphasis={emphasis}>
+  <span class="broken-rule__lead" aria-hidden="true"></span>
+  <span class="broken-rule__label">{label}</span>
+  <span class="broken-rule__tail" aria-hidden="true"></span>
+</div>
+
+<style>
+  .broken-rule {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .broken-rule__lead,
+  .broken-rule__tail {
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .broken-rule__lead { flex: 1; }
+  .broken-rule__tail { flex: 3; }
+
+  .broken-rule__label {
+    flex: 0 0 auto;
+    font-size: 13px;
+    font-weight: 500;
+    font-stretch: 105%;
+    color: var(--silk-dim);
+    white-space: nowrap;
+  }
+
+  .broken-rule[data-emphasis='strong'] .broken-rule__label { color: var(--silk); }
+
+  @media (max-width: 900px) {
+    .broken-rule { gap: 12px; }
+    .broken-rule__tail { flex: 2; }
+    .broken-rule__label { font-size: 12px; font-stretch: 100%; }
+  }
+</style>

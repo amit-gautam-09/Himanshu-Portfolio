@@ -1,0 +1,134 @@
+---
+/**
+ * Timeline — the routed spine with a via at every entry, sheet 4.
+ *
+ * GEOMETRY RULE, and the reason this is not one SVG: the spine is a plain
+ * 2px <div> that stretches, and every via is its OWN fixed 16x16 SVG at
+ * natural size. Drawing the whole thing as a single tall polyline with
+ * `preserveAspectRatio: none` — the obvious shortcut — scales x and y
+ * unequally and turns every via ring into an ellipse. Nothing here scales.
+ *
+ * The 45° entry and exit caps are the same idiom as `TraceVia`: the spine
+ * arrives from the card edge and leaves toward the next section, rather than
+ * starting and stopping in mid-air.
+ *
+ * Via states (component inventory 1.6's vocabulary):
+ *   normal    --rule-2 ring, --void core
+ *   notable   --live ring, --void core
+ *   current   --live ring, --live core, and the date lifts to --live
+ */
+import type { TimelineKind } from '../data/about';
+
+interface Props {
+  entries: { date: string; title: string; note?: string; kind?: TimelineKind }[];
+  class?: string;
+}
+const { entries, class: className } = Astro.props;
+
+const RING = {
+  normal: { stroke: 'var(--rule-2)', core: 'var(--void)', r: 2 },
+  notable: { stroke: 'var(--live)', core: 'var(--void)', r: 2 },
+  current: { stroke: 'var(--live)', core: 'var(--live)', r: 2.4 }
+} as const;
+---
+
+<div class:list={['timeline', className]}>
+  <svg class="timeline__cap" width="60" height="24" viewBox="0 0 60 24" aria-hidden="true">
+    <path d="M38 0 L20 18 L20 24" fill="none" stroke="var(--rule)" stroke-width="2" />
+  </svg>
+
+  <ol class="timeline__list">
+    {entries.map((e) => {
+      const ring = RING[e.kind ?? 'normal'];
+      return (
+        <li class:list={['timeline__entry', { 'is-current': e.kind === 'current' }]}>
+          <svg class="timeline__via" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" fill="none" stroke={ring.stroke} stroke-width="2" />
+            <circle cx="8" cy="8" r={ring.r} fill={ring.core} />
+          </svg>
+          <p class="timeline__date">{e.date}</p>
+          <h3 class="timeline__title">{e.title}</h3>
+          {e.note && <p class="timeline__note">{e.note}</p>}
+        </li>
+      );
+    })}
+  </ol>
+
+  <svg class="timeline__cap" width="60" height="30" viewBox="0 0 60 30" aria-hidden="true">
+    <path d="M20 0 L20 6 L33 19" fill="none" stroke="var(--rule)" stroke-width="2" />
+    <circle cx="38" cy="24" r="5" fill="none" stroke="var(--rule)" stroke-width="2" />
+  </svg>
+</div>
+
+<style>
+  .timeline { position: relative; }
+
+  .timeline__cap { display: block; }
+
+  .timeline__list {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* The spine. A stretched div, never a scaled stroke. 19px puts its 2px
+     width centred on 20, which is where the caps' paths and every via
+     centre land. */
+  .timeline__list::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--rule);
+  }
+
+  .timeline__entry {
+    position: relative;
+    padding-left: 64px;
+    min-height: 16px;
+  }
+
+  .timeline__entry + .timeline__entry { margin-top: 26px; }
+
+  .timeline__via {
+    position: absolute;
+    left: 12px;
+    top: 2px;
+  }
+
+  .timeline__date {
+    font-family: var(--f-data);
+    font-size: 12px;
+    color: var(--silk-faint);
+  }
+
+  .timeline__entry.is-current .timeline__date { color: var(--live); }
+
+  .timeline__title {
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 600;
+    font-stretch: 92%;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .timeline__note {
+    margin-top: 2px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--silk-dim);
+  }
+
+  @media (max-width: 900px) {
+    .timeline__entry { padding-left: 46px; }
+    .timeline__via { left: 4px; }
+    .timeline__list::before { left: 11px; }
+    .timeline__cap { margin-left: -8px; }
+    .timeline__title { font-size: 16px; }
+    .timeline__note { font-size: 13px; }
+  }
+</style>

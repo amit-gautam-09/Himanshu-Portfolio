@@ -1,0 +1,164 @@
+---
+/**
+ * TitleBlockFooter — the drawing title block: title cell, a Rev/Sheet/Date/
+ * Scale quad, and drawn-by + links. All cells hairline-divided.
+ * `sheet` runs "1 of 5" through "5 of 5".
+ */
+import { titleBlock, identity, cv } from '../data/site';
+
+interface Props {
+  sheet: string;
+  class?: string;
+}
+const { sheet, class: className } = Astro.props;
+---
+
+<footer class:list={['title-block', className]}>
+  <div class="title-block__frame measure">
+    <div class="title-block__cell title-block__cell--title">
+      <div class="title-block__label">Title</div>
+      <div class="title-block__title">{titleBlock.title}</div>
+      <div class="title-block__subtitle">{titleBlock.subtitle}</div>
+    </div>
+
+    <div class="title-block__quad">
+      <div class="title-block__qcell">
+        <div class="title-block__label title-block__label--sm">Rev</div>
+        <div class="title-block__value">{titleBlock.rev}</div>
+      </div>
+      <div class="title-block__qcell">
+        <div class="title-block__label title-block__label--sm">Sheet</div>
+        <div class="title-block__value">{sheet}</div>
+      </div>
+      <div class="title-block__qcell">
+        <div class="title-block__label title-block__label--sm">Date</div>
+        <div class="title-block__value">{titleBlock.date}</div>
+      </div>
+      <div class="title-block__qcell">
+        <div class="title-block__label title-block__label--sm">Scale</div>
+        <div class="title-block__value">{titleBlock.scale}</div>
+      </div>
+    </div>
+
+    <div class="title-block__cell title-block__cell--by">
+      <div class="title-block__label title-block__label--sm">Drawn by</div>
+      <div class="title-block__value">{titleBlock.drawnBy}</div>
+      <div class="title-block__links">
+        <a href={identity.email}>Email</a>
+        <a href={cv.href}>{cv.label}</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .title-block {
+    border-top: 1px solid var(--rule);
+    padding: 0 var(--page-margin) 40px;
+  }
+
+  .title-block__frame {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+    border: 1px solid var(--rule);
+    border-top: none;
+  }
+
+  .title-block__cell { padding: 22px 24px; }
+  .title-block__cell--title { border-right: 1px solid var(--rule); }
+
+  .title-block__cell--by {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .title-block__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--silk-faint);
+  }
+
+  .title-block__label--sm { font-size: 11px; font-weight: 400; }
+
+  .title-block__title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  .title-block__subtitle {
+    font-family: var(--f-data);
+    font-size: 12px;
+    color: var(--silk-dim);
+    margin-top: 14px;
+  }
+
+  .title-block__quad {
+    border-right: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .title-block__qcell { padding: 14px 16px; }
+  .title-block__qcell:nth-child(1) { border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); }
+  .title-block__qcell:nth-child(2) { border-bottom: 1px solid var(--rule); }
+  .title-block__qcell:nth-child(3) { border-right: 1px solid var(--rule); }
+
+  .title-block__value {
+    font-family: var(--f-data);
+    font-size: 13px;
+    margin-top: 3px;
+  }
+
+  .title-block__links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  /* WCAG 2.2 AA 2.5.8, the TRD's >=24x24 gate. These measured 316x14 on 20px
+     centres: too small, and too close together for the spacing exception —
+     24px circles on 20px centres intersect. A 24px floor makes each link
+     meet the size rule outright, and the row keeps its 13px type. */
+  .title-block__links a {
+    display: flex;
+    align-items: center;
+    min-height: 24px;
+  }
+
+  /* 390: one column, the quad stays 2x2, frame closes on all sides. */
+  @media (max-width: 900px) {
+    .title-block {
+      border-top: none;
+      padding: 28px var(--page-margin) 32px;
+    }
+
+    .title-block__frame {
+      grid-template-columns: minmax(0, 1fr);
+      border-top: 1px solid var(--rule);
+    }
+
+    .title-block__cell--title {
+      border-right: none;
+      border-bottom: 1px solid var(--rule);
+      padding: 16px;
+    }
+
+    .title-block__title { font-size: 14px; margin-top: 5px; }
+    .title-block__subtitle { display: none; }
+
+    .title-block__quad { border-right: none; }
+    .title-block__qcell { padding: 12px 16px; }
+    .title-block__qcell:nth-child(3) { border-bottom: 1px solid var(--rule); }
+    .title-block__qcell:nth-child(4) { border-bottom: 1px solid var(--rule); }
+    .title-block__value { font-size: 12px; }
+
+    .title-block__cell--by { padding: 16px; gap: 8px; }
+    .title-block__cell--by > .title-block__label,
+    .title-block__cell--by > .title-block__value { display: none; }
+    .title-block__links { margin-top: 0; }
+  }
+</style>

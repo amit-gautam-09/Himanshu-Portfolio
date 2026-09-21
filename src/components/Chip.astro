@@ -1,0 +1,82 @@
+---
+/**
+ * Chip — one component, five variants. All border-radius 2px, mono 11-12px.
+ *
+ * | variant          | border                | text          | use              |
+ * | spec             | --rule + --panel-2    | --silk        | measured facts   |
+ * | standard         | --rule, no fill       | --silk-dim    | compliance refs  |
+ * | status-released  | --pass @40%           | --pass        | Released / Flown |
+ * | status-progress  | --live @45%           | --live        | In progress      |
+ * | confidential     | DASHED --rule         | --silk-faint  | client work      |
+ *
+ * The dashed border is load-bearing (§9.1) -- it is how a confidential board
+ * is marked. Do not unify it with `standard`.
+ */
+interface Props {
+  variant?: 'spec' | 'standard' | 'status-released' | 'status-progress' | 'confidential';
+  class?: string;
+}
+const { variant = 'spec', class: className } = Astro.props;
+---
+
+<span class:list={['chip', `chip--${variant}`, className]}><slot /></span>
+
+<style>
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--f-data);
+    font-weight: 400;
+    border-radius: var(--r-chip);
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  /* measured facts: `380-400 VDC bus` */
+  .chip--spec {
+    font-size: 12px;
+    padding: 4px 8px;
+    color: var(--silk);
+    background: var(--panel-2);
+    border-color: var(--rule);
+  }
+
+  /* compliance refs: `IEC 61000-3-2` */
+  .chip--standard {
+    font-size: 11px;
+    padding: 3px 7px;
+    color: var(--silk-dim);
+    border-color: var(--rule);
+  }
+
+  .chip--status-released {
+    font-size: 11px;
+    padding: 2px 6px;
+    color: var(--pass);
+    border-color: var(--pass-edge);
+  }
+
+  .chip--status-progress {
+    font-size: 11px;
+    padding: 3px 7px;
+    color: var(--live);
+    border-color: var(--live-edge);
+  }
+
+  /* The dash is the signal. See §9.1 — confidentiality chips. */
+  .chip--confidential {
+    font-size: 11px;
+    padding: 3px 7px;
+    color: var(--silk-faint);
+    border-style: dashed;
+    border-color: var(--rule);
+  }
+
+  @media (max-width: 900px) {
+    .chip--spec { font-size: 11px; padding: 3px 6px; }
+    .chip--standard { font-size: 10px; padding: 3px 6px; }
+    .chip--status-released { font-size: 10px; padding: 2px 5px; }
+    .chip--status-progress { font-size: 10px; padding: 3px 6px; }
+    .chip--confidential { font-size: 10px; padding: 3px 6px; }
+  }
+</style>

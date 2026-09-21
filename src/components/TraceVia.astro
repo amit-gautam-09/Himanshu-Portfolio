@@ -1,0 +1,113 @@
+---
+/**
+ * TraceVia — the 45°-routed trace with a via ring, down the left inset of
+ * every card.
+ *
+ * Absolutely positioned SVG at FIXED width AND height. Never height:100% +
+ * preserveAspectRatio:none -- that ovalises the via ring and flattens the
+ * 45° chamfer (component inventory 1.6). Geometry comes from
+ * scripts/trace-geometry.js, and trace-fit.js REGENERATES it (never scales
+ * it) at the card's measured height once the page is live.
+ *
+ * States
+ *   rest          --rule
+ *   hover         amber pulse travels the trace, via lights
+ *   unfabricated  dashed trace + dashed via in --live (U5 today, §9.1)
+ *   broken        404: --fault with a cross through the via
+ */
+import { traceGeometry } from '../scripts/trace-geometry.js';
+
+interface Props {
+  height: number;
+  state?: 'rest' | 'unfabricated' | 'broken';
+  compact?: boolean;
+  class?: string;
+}
+const { height, state = 'rest', compact = false, class: className } = Astro.props;
+const g = traceGeometry(height, compact);
+const r = 7;
+---
+
+<svg
+  width={g.width}
+  height={g.height}
+  viewBox={`0 0 ${g.width} ${g.height}`}
+  class:list={['trace', `trace--${state}`, className]}
+  data-compact={String(compact)}
+  aria-hidden="true"
+>
+  <path class="trace__path" d={g.d} fill="none" stroke-width="2" />
+  <circle class="trace__via" cx={g.viaCx} cy={g.viaCy} r={g.viaR} fill="none" stroke-width="2" />
+  <circle class="trace__via-core" cx={g.viaCx} cy={g.viaCy} r="1.5" />
+
+  {state === 'rest' && (
+    <path
+      class="trace__pulse"
+      d={g.d}
+      fill="none"
+      stroke-width="2"
+      stroke-linecap="round"
+      pathLength="100"
+    />
+  )}
+
+  {state === 'broken' && (
+    <g class="trace__break" stroke-width="1.5" stroke-linecap="round">
+      <line x1={g.viaCx - r} y1={g.viaCy - r} x2={g.viaCx + r} y2={g.viaCy + r} />
+      <line x1={g.viaCx + r} y1={g.viaCy - r} x2={g.viaCx - r} y2={g.viaCy + r} />
+    </g>
+  )}
+</svg>
+
+<style is:global>
+  .trace {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+  }
+
+  .trace__path,
+  .trace__via { stroke: var(--rule); }
+  .trace__via-core { fill: transparent; }
+
+  /* Not yet fabricated: the dashed trace is the signal, the chip only names
+     it (§9.1). Dash figures are the --trace/--via-dash-unfabricated tokens. */
+  .trace--unfabricated .trace__path { stroke: var(--live); stroke-dasharray: 6 6; }
+  .trace--unfabricated .trace__via  { stroke: var(--live); stroke-dasharray: 3 3; }
+
+  .trace--broken .trace__path,
+  .trace--broken .trace__via,
+  .trace__break { stroke: var(--fault); }
+
+  /* Hover, 480ms: only the border tone and the trace change.
+     The card does not lift, scale or cast a shadow. */
+  .trace__pulse {
+    stroke: var(--live);
+    stroke-dasharray: 18 100;
+    stroke-dashoffset: 18;
+    opacity: 0;
+  }
+
+  .board-card:hover .trace__via,
+  .board-card:focus-within .trace__via {
+    stroke: var(--live);
+    transition: stroke var(--d-slow) var(--e-probe);
+  }
+
+  .board-card:hover .trace__via-core,
+  .board-card:focus-within .trace__via-core { fill: var(--void); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .board-card:hover .trace__pulse,
+    .board-card:focus-within .trace__pulse {
+      opacity: 1;
+      animation: trace-pulse var(--d-slow) var(--e-probe);
+    }
+  }
+
+  @keyframes trace-pulse {
+    from { stroke-dashoffset: 18; }
+    to   { stroke-dashoffset: -100; }
+  }
+</style>

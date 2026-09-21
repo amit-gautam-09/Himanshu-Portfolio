@@ -1,0 +1,90 @@
+---
+/**
+ * MetricCell — DimensionLine + mono value (tabular-nums) + caption.
+ * Four per row on the 1440 artboard, two per row at 390.
+ *
+ * The measurement and the value arrive as ONE gesture: the line draws, the
+ * arrowheads snap and the value lands on the same tween, not after it. The
+ * 390 artboard drops the dimension line entirely.
+ *
+ * Under prefers-reduced-motion the value PRINTS rather than counts.
+ */
+import DimensionLine from './DimensionLine.astro';
+
+interface Props {
+  value: string;
+  caption: string;
+  /** 390 artboard shortens some values ("380-400 V") and captions. */
+  mobileValue?: string;
+  mobileCaption?: string;
+  class?: string;
+}
+const {
+  value, caption,
+  mobileValue = value, mobileCaption = caption,
+  class: className
+} = Astro.props;
+const valueDiffers = mobileValue !== value;
+const captionDiffers = mobileCaption !== caption;
+---
+
+<div class:list={['metric', className]} data-reveal>
+  <DimensionLine width={120} class="metric__dim" />
+  <div class="metric__value">
+    <span class:list={{ 'is-wide-only': valueDiffers }}>{value}</span>
+    {valueDiffers && <span class="is-narrow-only">{mobileValue}</span>}
+  </div>
+  <div class="metric__caption">
+    <span class:list={{ 'is-wide-only': captionDiffers }}>{caption}</span>
+    {captionDiffers && <span class="is-narrow-only">{mobileCaption}</span>}
+  </div>
+</div>
+
+<style>
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .metric__value {
+    font-family: var(--f-data);
+    font-weight: 500;
+    font-size: 34px;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric__caption {
+    font-size: 13px;
+    color: var(--silk-dim);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .metric[data-reveal] .metric__value {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    .metric[data-reveal][data-revealed] .metric__value {
+      opacity: 1;
+      transform: none;
+      /* same tween as the dimension line above it */
+      transition: opacity var(--d-slow) var(--e-settle),
+                  transform var(--d-slow) var(--e-settle);
+    }
+  }
+
+  .is-narrow-only { display: none; }
+
+  @media (max-width: 900px) {
+    .is-wide-only { display: none; }
+    .is-narrow-only { display: inline; }
+    .metric { gap: 0; }
+    /* Anchored :global(): DimensionLine.astro's root carries its own scope
+       id AND its own `display: inline-flex`, which a bare :global() would
+       lose to on specificity. */
+    .metric :global(.metric__dim) { display: none; }   /* not on the 390 artboard */
+    .metric__value { font-size: 24px; }
+    .metric__caption { font-size: 12px; margin-top: 4px; }
+  }
+</style>

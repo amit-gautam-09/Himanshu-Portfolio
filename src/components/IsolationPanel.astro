@@ -1,0 +1,75 @@
+---
+/**
+ * IsolationPanel — the ice-tinted callout: --iso @8% fill, --iso @20% border,
+ * no radius. Carries the logo mark and a heading.
+ *
+ * Used for work authorisation and every scope note. The mark is drawn with
+ * both arcs in --iso here: the panel sits wholly on the isolated side of the
+ * barrier, which is the one place the design reference recolours it.
+ */
+import Logo from './Logo.astro';
+
+interface Props {
+  heading: string;
+  /** Optional lede under the heading, in the left cell. */
+  lede?: string;
+  /** Two-cell split (heading left, content right) vs a single stacked cell. */
+  split?: boolean;
+  class?: string;
+}
+const { heading, lede, split = false, class: className } = Astro.props;
+---
+
+<div class:list={['iso-panel', { 'iso-panel--split': split }, className]}>
+  <div class="iso-panel__head">
+    <div class="iso-panel__title">
+      <Logo size={22} tone="iso" class="iso-panel__mark" />
+      <h3 class="iso-panel__heading">{heading}</h3>
+    </div>
+    {lede && <p class="iso-panel__lede">{lede}</p>}
+  </div>
+  <div class="iso-panel__body"><slot /></div>
+</div>
+
+<style>
+  .iso-panel {
+    background: var(--iso-wash);
+    border: 1px solid var(--iso-edge);
+    padding: 32px 36px;
+    border-radius: 0;   /* no radius here — only chips and cards curve */
+  }
+
+  .iso-panel--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: 40px;
+  }
+
+  .iso-panel__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .iso-panel__heading {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .iso-panel__lede {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--silk-dim);
+    max-width: 34ch;
+  }
+
+  @media (max-width: 900px) {
+    .iso-panel { padding: 20px; }
+    .iso-panel--split { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    /* Anchored :global(): Logo.astro's root carries its own scope id. */
+    .iso-panel__title :global(.iso-panel__mark) { display: none; }  /* 390 is heading-only */
+    .iso-panel__heading { font-size: 17px; }
+  }
+</style>
