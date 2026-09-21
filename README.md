@@ -1,65 +1,36 @@
-# Himanshu Gautam — Portfolio
+# Himanshu Gautam — portfolio
 
-Implementation of the **ISOLATION** design system from the Claude Design
-handoff bundle in `../Claude Design Prompts Implementation-handoff/`.
-
-**Built so far: the foundation and Sheet 1 (Home).** Sheets 2–5 are not built.
-See [What is not built yet](#what-is-not-built-yet).
-
----
-
-## Running it
+An Astro static build of the ISOLATION design handoff. Five designed sheets,
+eleven routes, no server runtime.
 
 ```bash
 npm install
-npm run dev      # http://localhost:4321
-npm run build    # -> dist/
-npm run preview
+npm run build
+npm run preview    # http://localhost:4321
 ```
 
-Astro 5, static output. Real HTML ships for every route; the only hydrated
-surface is the S1 WebGL scene in the Home hero.
+**Test against `preview`, not `dev`.** The dev server's HMR client served a
+stale copy of a page's scoped CSS during the build, which looked exactly like
+a specificity bug and was not. `build && preview` is what ships.
 
----
+`tools-shot.mjs` is a zero-dependency headless-Chrome harness used to measure
+every layout in this repo against the design reference — exact viewports,
+scroll, in-page eval, reduced-motion emulation, screenshots. Read its header.
 
-## What is built
+## Structure
 
-**Foundation**
-
-| | |
+| Path | What |
 |---|---|
-| `src/styles/tokens.css` | §9 drop-in token file, plus §9.1 conventions |
-| `src/styles/base.css` | ground texture, type defaults, the 12-column isolation grid, the barrier |
-| `src/styles/power-on.css` | the ~1.6 s power-on sequence |
+| `src/pages/` | the eleven routes; `work/[slug].astro` generates all five case studies |
+| `src/data/` | all content — `boards`, `cases`, `about`, `site` |
+| `src/components/` | 22 components; the inventory in the handoff names most of them |
+| `public/3d/` | vanilla ES modules, resolved by import map, not bundled |
 
-**Primitives** — `Logo`, `BrokenRule`, `Chip` (5 variants), `DimensionLine`,
-`DepthMarker`, `TraceVia`.
+## Deployment
 
-**Composites** — `SpecRail`, `BoardCard`, `MetricCell`, `CapabilityRow`,
-`IsolationPanel`, `TitleBlockFooter`, `Nav`.
-
-**Sheet 1** — Home at both designed artboards (1440 and 390), with the S1
-three.js scene in the hero, the scroll-linked explode, the power-on sequence
-and the measurement reveal, each with its reduced-motion path.
-
-### The barrier
-
-One continuous 1px hairline down the **centre of column 4**, spanning the full
-page height, annotated exactly once with the creepage mark — not per-section
-fragments (build note 1). The design reference draws it at `left: 445px` on the
-1440 artboard; the implementation derives that position from the grid instead of
-hard-coding it:
-
-```
-col        = (100% - 11 × gutter) / 12
-barrier-x  = 3 × (col + gutter) + col / 2
-```
-
-At 1440 that resolves to exactly 445px, and it stays on column 4 at any width.
-Below 900px the barrier rotates horizontal under the spec strip. It does not
-disappear (build note 3).
-
----
+Static, no adapter. GitHub Pages (`.github/workflows/deploy.yml`), Netlify
+(`netlify.toml`) and Vercel (`vercel.json`) configs are all committed. The
+canonical host is set once, in `astro.config.mjs`.
 
 ## Decisions that were not designed
 

@@ -1,61 +1,63 @@
-# Resume point — paused 2026-09-21 (session 3)
+# State of play — 2026-09-22
 
-Read `README.md` first for what was built and why. This file is the **state of
-play**: what is finished, what is broken, and what to do next.
+The site is **complete and deployed**. Everything below the next two sections
+is the record of how it was built and the traps that cost time; read it before
+changing the 3D, the grid or the hit targets.
 
-**Jump to "START HERE — next session" at the bottom for the actual task.**
-Everything between is the record of how the current state was reached, and the
-traps that cost time getting there.
+Repo: `https://github.com/amit-gautam-09/Himanshu-Portfolio`
 
 ---
 
-## Status
+## Status: DONE
 
-**Sheets 1 (Home), 3 (Work index) and 4 (About) are finished**, verified item
-by item at 1440 and 390, building clean. **No open bugs.** Sheets 2 and 5 not
-started — 5 is unblocked, 2 is the hard one.
+All five sheets, all eleven routes, building clean, verified at 1440 and 390.
 
-The hero stackup was rebuilt on 2026-09-21 as a **real six-layer** — the
-handoff's drawing showed four copper layers totalling 0.95 mm and called it
-six-layer at 1.60 mm. See "S1 rebuilt" below.
+| Route | Sheet | Notes |
+|---|---|---|
+| `/` | 1 Home | pinned hero, scroll-linked six-layer explode, metric count-up |
+| `/work` | 3 Work index | capability filter, counts derived from the data |
+| `/work/<5 slugs>` | 2 Case study | one template, five boards, S2–S5 scenes |
+| `/about` | 4 About | timeline, capability matrix, depth markers |
+| `/contact` | 5 Contact | WhatsApp + email, **no form** (client decision) |
+| `/cv` | — | a real page, not a redirect |
+| `/404` | — | broken-trace treatment |
+| `/sitemap.xml`, `/robots.txt` | — | sitemap generated from the routes |
 
-Files that exist now and did not at the end of session 2:
-
-| Path | What it is |
-|---|---|
-| `src/pages/work.astro` | Sheet 3 |
-| `src/components/FilterChips.astro` | capability filter (inventory 4.3) |
-| `src/scripts/work-filter.js` | its behaviour |
-| `src/scripts/metric-count.js` | the count-up 06 §3 asks for |
-| `tools-shot.mjs` | headless Chrome + CDP harness — **read its header** |
-
-Changed: `BoardCard` (index / featured / milestone / capabilities),
-`boards.ts` (facets, `benchBoard`, derived counts), `base.css` (`.sr-only`,
-iso-grid mobile collapse), `Nav`, `TitleBlockFooter`, `index.astro` (hero pin),
-`public/3d/hero-stage.js` (framing, lens, scroll ownership).
-
-**Nothing is running.** The preview server from this session was reaped for
-memory pressure and its orphaned child may or may not still hold port 4321 —
-check before assuming, and restart with `npm run preview`.
-
-Sheet 1 also gained the metric count-up it was missing (06 §3: "numbers count
-on the same tween"). `src/scripts/metric-count.js` reads `--d-slow` and
-`--e-settle` from the tokens so the number, the line and the arrowheads stay
-one gesture. Watch the units: the build minifies `480ms` to `.48s`, and a bare
-`parseFloat` counts the whole value in half a millisecond.
+JSON-LD (Person) and Open Graph tags ship on every page from `Sheet.astro`.
 
 ```bash
 cd site
-npm install      # if node_modules is missing
+npm install
 npm run build
-npm run preview  # http://localhost:4321 — test against THIS, not `npm run dev`
+npm run preview   # http://localhost:4321 — test against THIS, never `npm run dev`
 ```
 
-Use **preview**, not dev. The dev server's HMR client swapped in a stale copy
-of `index.astro`'s scoped CSS for a good while this session — the inline
-`<style>` in the served HTML was correct, the sheet the browser actually
-applied was not. That cost real time. `npm run build && npm run preview` is
-what ships and never lies.
+### Deployment
+
+Static output, no adapter, no server runtime — the contact page reaches
+WhatsApp and email directly, so there is nothing to run. Three paths are
+committed and any one works:
+
+- **GitHub Pages** — `.github/workflows/deploy.yml`, builds on push to `main`.
+  Enable Pages → Source: GitHub Actions. With the custom domain set, no `base`
+  is needed; on a project subpath you must set `base` in `astro.config.mjs`.
+- **Netlify** — `netlify.toml`.
+- **Vercel** — `vercel.json`.
+
+`astro.config.mjs` has `site: 'https://himanshugautam.world'`, which is what
+canonical URLs, the sitemap and OG tags derive from. Change it there, once.
+
+### What is deliberately NOT built
+
+- **`/lab` and `/lab/[slug]`.** The schema hides `/lab` from nav until it has
+  at least one entry, and the client has none. `nav` already omits it. This is
+  the schema's own rule, not an omission.
+- **The contact form.** #3c draws rest and error states; the client chose
+  WhatsApp + email instead on 2026-09-21. That is why there is no adapter.
+- **Photographs, anywhere.** None exist that are publishable. Three of five
+  boards are barred from showing any regardless.
+- **Build-time 3D stills.** The scenes degrade to a captioned empty frame,
+  which is honest, but a rendered still would be better.
 
 ---
 
@@ -592,62 +594,25 @@ own right edge when adding labels.
 
 ---
 
-## START HERE — next session
+## If you pick this up again
 
-**Build Sheet 5 (Contact).** Sheets 1, 3 and 4 are done; Sheet 5 is unblocked
-now the WhatsApp number has arrived. Everything above this line is reference.
+Nothing is blocking. In rough order of value:
 
-Sheet 5 is a deliberate deviation from its artboard: **WhatsApp click-to-chat
-plus the email address, and NO form**, so #3c's rest and error states are not
-built and the site stays `output: 'static'`. The copy is approved and sits in
-`site.ts` as `contact`. Build the page around `contact.lookingFor`,
-`contact.domain`, `contact.locations`, `contact.channel` and
-`contact.whatsapp` — and publish no response-time commitment, which was asked
-for and declined.
+1. **Build-time stills for the 3D scenes.** Each scene currently degrades to a
+   captioned empty frame for no-WebGL, low-power and reduced-motion visitors.
+   A rendered PNG per scene, shipped in the same commit as the scene, is what
+   the PRD asks for.
+2. **Lighthouse and axe-core passes** against the deployed URL. The budgets
+   are in `04-TRD.md` §7; the acceptance criteria want ≥90 performance and
+   ≥95 accessibility on mobile, and zero serious axe violations.
+3. **Real-device testing**, especially Safari on iOS — the pinned hero and the
+   `touch-action: pan-y` on the canvases are the two things most likely to
+   behave differently there.
+4. **OG images.** The tags ship; there is no image behind them yet.
+5. **`/lab`**, once there is a first entry to put in it.
 
-Then **Sheet 2** (case study U2) last — see below.
+If photography ever arrives, U1 is the only board allowed to show it: restore
+the reference's "Photographs available" wording and build the gallery.
 
-The method that worked for Sheet 3, in order:
+---
 
-1. **Read the reference with the DOM, not the eye.** Load the design canvas in
-   `tools-shot.mjs` and `--eval` a walk of the sheet that dumps each element's
-   text, position, size, font and colour. That is where "content column x=512,
-   scope panel h=252, filter chips 32px" came from. Screenshots confirm;
-   numbers decide.
-   *Gotcha:* the turns sit in a horizontal flex row in REVERSE order (5a
-   first, 1a at x=19522), so scroll to `getBoundingClientRect().left`, not
-   `.top`. **About is `#3b`.**
-2. **Pull the copy out of the reference too** — a `querySelectorAll('p')` dump
-   beats transcribing from a screenshot, and it caught the exact scope-note
-   wording on Sheet 3.
-3. **Check `09-COMPONENT-INVENTORY.md` and reuse before building.**
-   `DepthMarker` already exists and is still unused — Sheet 4 is what it was
-   built for.
-4. **Build, then measure the result against the reference's own numbers.**
-
-Sheet 4 specifics:
-
-- Timeline, and the capability matrix with `DepthMarker`.
-- *Trap:* do not draw the timeline spine as one long polyline with
-  `preserveAspectRatio:none` — it ovalises the via rings.
-- No mobile artboard exists for 3b either, so follow #1b's rules as Sheet 3
-  did, and remember `.iso-grid` now collapses on its own.
-
-Then, in the handoff's order — **Sheet 2 last**, its signal-chain diagram is
-the hardest single component:
-
-- **Sheet 5** Contact — form in both designed states; never clears on failure;
-  every error names cause **and** fix.
-- **Sheet 2** Case study U2 — `SignalChain` as **one CSS grid with explicit
-  row numbers**, barrier in column 2 spanning `grid-row: 1 / 12`, transformers
-  on the same grid row as the stage they serve.
-  *Trap:* not pixel offsets — that drifted out of alignment in the design's own
-  first implementation.
-  *Also:* any `three-d-stage` embedded in page flow needs the four scroll
-  lines from the S1 fix, or it will trap the wheel again.
-
-Also outstanding: rendered stills for each 3D scene at build time, for the
-no-WebGL / low-power / reduced-motion fallback.
-
-Content gaps: placeholder email and LinkedIn in `src/data/site.ts`; CANSAT
-flight photographs for U1.
