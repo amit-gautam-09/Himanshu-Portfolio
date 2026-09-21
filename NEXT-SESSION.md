@@ -8,7 +8,54 @@ Repo: `https://github.com/amit-gautam-09/Himanshu-Portfolio`
 
 ---
 
-## Status: DONE
+## Status: BUILT AND PUSHED — not yet deployed
+
+The one outstanding action is **deploying to Vercel**, and it needs a human:
+it starts with a browser login. Nothing else is blocking.
+
+`main` is at `4a3f92d`, working tree clean, local and remote in sync.
+
+### Deploy to Vercel — pick up exactly here
+
+Verified 2026-09-22 against a **fresh clone**: `npm ci && npm run build`
+produces all 11 pages including `404.html`, so the build will not surprise
+Vercel. Node is pinned to `22.x` in `package.json` `engines`.
+
+1. vercel.com → Sign Up / Log In → **Continue with GitHub**.
+2. **Add New… → Project** → import **`Himanshu-Portfolio`**. If it is not
+   listed, **Adjust GitHub App Permissions** and grant that repo.
+3. Confirm the detected settings and change nothing:
+   Framework **Astro**, Root Directory **`./`**, Build `npm run build`,
+   Output `dist`. **Root Directory must stay `./`** — the repo root IS the
+   site, there is no `site/` folder inside it. That is the field that goes
+   wrong. No environment variables; the site is static.
+4. **Deploy** (~1–2 min), then check: hero explodes on scroll, `/work` filter
+   chips actually filter, a case study's 3D board spins, `/contact` WhatsApp
+   opens a chat, `/nope` shows the broken-trace 404.
+5. **Settings → Domains** → add `himanshugautam.world` and `www.` (accept the
+   redirect), then create the DNS records **Vercel shows** at the registrar.
+
+**Expected and correct:** until the domain is attached, canonical, OG and
+sitemap URLs all read `https://himanshugautam.world` even on the
+`.vercel.app` address. It is set once, in `astro.config.mjs`.
+
+### The Vercel agent plugin was NOT installed
+
+`npx --yes plugins add vercel/vercel-plugin` was run on 2026-09-22 and left at
+its `Install? [Y/n]` prompt unanswered — `~/.claude/plugins/installed_plugins.json`
+is unchanged. The installer package is `plugins` (vercel-labs) but it resolved
+the plugin itself from `github.com/vercel/vercel-plugin`. It would install at
+**user scope** — 37 skills, 5 commands, hooks and an MCP server active in
+every project on this machine. Re-run it if that is wanted; **the deployment
+needs none of it**.
+
+Note for whoever picks this up: I cannot run that command. The sandbox blocks
+`npx` of an unvetted package as "Code from External". The user must run it
+with a `!` prefix.
+
+---
+
+## Everything that is finished
 
 All five sheets, all eleven routes, building clean, verified at 1440 and 390.
 
